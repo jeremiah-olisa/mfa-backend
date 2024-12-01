@@ -35,7 +35,7 @@ class LoginController extends Controller
      *
      * @var string
      */
-    protected $redirectTo = '/home';
+    protected $redirectTo = '/dashboard';
     protected UserRepository $userRepository;
     // protected UserAppRepository $userAppRepository;
     /**
@@ -45,8 +45,8 @@ class LoginController extends Controller
      */
     public function __construct(UserRepository $userRepository)
     {
-        $this->middleware('guest')->except('logout');
-        $this->middleware('auth')->only('logout');
+        // $this->middleware('guest')->except('logout');
+        // $this->middleware('auth')->only('logout');
         $this->userRepository = $userRepository;
         // $this->userAppRepository = $userAppRepository;
     }
@@ -108,6 +108,7 @@ class LoginController extends Controller
             throw $e; // Re-throw the exception for further handling/logging
         }
 
+
         // Handle rate-limiting for failed login attempts
         if (
             method_exists($this, 'hasTooManyLoginAttempts') &&
@@ -131,9 +132,9 @@ class LoginController extends Controller
 
         // Attempt login
         if ($this->attemptLogin($request)) {
-            if ($request->hasSession() && !$request->wantsJson()) {
+            if ($request->hasSession() && !$request->wantsJson())
                 $request->session()->put('auth.password_confirmed_at', time());
-            }
+
 
             return $this->sendLoginResponse($request);
         }
@@ -215,7 +216,7 @@ class LoginController extends Controller
     protected function attemptLogin(Request $request)
     {
         $cred = $this->credentials($request);
-        if ($request->wantsJson() == 'web')
+        if (!$request->wantsJson())
             return $this->guard('web')->attempt(
                 $cred,
                 $request->boolean('remember')

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\AuthenticationController;
@@ -21,8 +22,8 @@ Route::middleware(['api'])->group(function () {
         Route::post('login', [LoginController::class, 'login']);
         Route::post('register', [RegisterController::class, 'register']);
 
-        // Route::middleware('auth:sanctum')->group(function () {
-        //     Route::delete('logout', [AuthenticationController::class, 'logout']);
-        // });
+        Route::middleware('auth:sanctum')->group(function () {
+            Route::delete('logout', [AuthenticatedSessionController::class, 'destroy']);
+        });
     });
 });
