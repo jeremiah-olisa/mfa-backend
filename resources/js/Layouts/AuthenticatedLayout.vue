@@ -2,11 +2,12 @@
 import ApplicationLogo from '@/components/ApplicationLogo.vue';
 import Dropdown from '@/components/Dropdown.vue';
 import DropdownLink from '@/components/DropdownLink.vue';
+import NavigationMenu from '@/components/NavigationMenu.vue';
 import NavLink from '@/components/NavLink.vue';
 import ResponsiveNavLink from '@/components/ResponsiveNavLink.vue';
+import ThemeToggle from '@/components/ThemeToggle.vue';
 import { Link } from '@inertiajs/vue3';
 import { ref } from 'vue';
-import ThemeToggle from '@/components/ThemeToggle.vue';
 
 const showingNavigationDropdown = ref(false);
 </script>
@@ -36,12 +37,7 @@ const showingNavigationDropdown = ref(false);
                             <div
                                 class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex"
                             >
-                                <NavLink
-                                    :href="route('dashboard')"
-                                    :active="route().current('dashboard')"
-                                >
-                                    Dashboard
-                                </NavLink>
+                                <NavigationMenu :custom-component="NavLink" />
                             </div>
                         </div>
 
@@ -144,12 +140,7 @@ const showingNavigationDropdown = ref(false);
                     class="sm:hidden"
                 >
                     <div class="space-y-1 pb-3 pt-2">
-                        <ResponsiveNavLink
-                            :href="route('dashboard')"
-                            :active="route().current('dashboard')"
-                        >
-                            Dashboard
-                        </ResponsiveNavLink>
+                        <NavigationMenu :custom-component="ResponsiveNavLink" />
                     </div>
 
                     <!-- Responsive Settings Options -->
