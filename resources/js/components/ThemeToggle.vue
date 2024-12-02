@@ -42,7 +42,7 @@
 import Dropdown from '@/components/Dropdown.vue';
 import { Button } from '@/components/ui/button';
 import { Laptop, Moon, Sun } from 'lucide-vue-next';
-import { ref, watchEffect } from 'vue';
+import { onMounted, ref, watchEffect } from 'vue';
 
 type Modes = 'Dark' | 'Light' | 'System';
 // Reactive state for the current mode
@@ -58,7 +58,9 @@ const Icons = {
 const setMode = (mode: Modes) => {
     currentMode.value = mode;
 
-    // You can use localStorage to persist the mode or apply it directly
+    // Save the selected mode to localStorage
+    localStorage.setItem('theme-mode', mode);
+
     if (mode === 'Light') {
         document.documentElement.classList.add('light');
         document.documentElement.classList.remove('dark');
@@ -93,6 +95,14 @@ watchEffect(() => {
             document.documentElement.classList.add('light');
             document.documentElement.classList.remove('dark');
         }
+    }
+});
+
+// On mounted, retrieve the mode from localStorage and apply it
+onMounted(() => {
+    const savedMode = localStorage.getItem('theme-mode') as Modes;
+    if (savedMode) {
+        setMode(savedMode);
     }
 });
 </script>

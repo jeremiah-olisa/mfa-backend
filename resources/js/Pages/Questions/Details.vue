@@ -1,10 +1,9 @@
 ﻿<script setup lang="ts">
-import { Button } from '@/components/ui/button';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { formatDate } from '@/lib/utils';
 import { Head } from '@inertiajs/vue3';
-import { Upload } from 'lucide-vue-next';
 
+import UploadQuestionButton from '@/components/UploadQuestionButton.vue';
 import { ref } from 'vue';
 
 // Sample question data (replace with your actual data fetching logic)
@@ -37,17 +36,14 @@ function deleteQuestion() {
 
     <AuthenticatedLayout>
         <template #header>
-            <div class="flex w-full items-center justify-between">
+            <div class="flex gap-y-3 w-full flex-wrap items-center justify-between">
                 <h2
                     class="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200"
                 >
                     Questions
                 </h2>
 
-                <Button variant="outline">
-                    <Upload class="mr-2" />
-                    Upload Questions
-                </Button>
+                <UploadQuestionButton />
             </div>
         </template>
 

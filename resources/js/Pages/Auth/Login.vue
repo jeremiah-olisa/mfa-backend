@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import FormErrorAlert from '@/components/FormErrorAlert.vue';
 import InputError from '@/Components/InputError.vue';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -6,8 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import GuestLayout from '@/Layouts/GuestLayout.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { AlertCircle } from 'lucide-vue-next'
+
 defineProps<{
     canResetPassword?: boolean;
     status?: string;
@@ -37,19 +37,7 @@ const submit = () => {
             {{ status }}
         </div>
 
-        <div v-if="Object.keys(form.errors).length > 0" class="py-4">
-            <Alert variant="destructive">
-                <AlertCircle class="h-4 w-4" />
-                <AlertTitle>Error</AlertTitle>
-                <AlertDescription>
-                    <ul>
-                        <li v-for="(error, field) in form.errors" :key="field">
-                            <strong class="uppercase">{{ field }}:</strong> {{ error }}
-                        </li>
-                    </ul>
-                </AlertDescription>
-            </Alert>
-        </div>
+        <FormErrorAlert :errors="form.errors" />
 
         <form @submit.prevent="submit">
             <div>

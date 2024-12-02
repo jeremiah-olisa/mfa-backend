@@ -21,6 +21,7 @@ Route::get('/dashboard', function () {
 Route::middleware('auth')->group(function () {
     Route::prefix('questions')->group(function () {
         Route::get('/', [QuestionsController::class, 'list'])->name('questions.list');
+        Route::post('/upload', [QuestionsController::class, 'upload'])->name('questions.upload');
         Route::get('/{question_id}', [QuestionsController::class, 'details'])->name('questions.details');
     });
     Route::prefix('profile')->group(function () {
