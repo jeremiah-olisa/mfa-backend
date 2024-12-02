@@ -24,7 +24,6 @@ return new class extends Migration
             $table->enum('test_type', ['WAEC', 'NECO', 'JAMB', 'OYO']);
             $table->foreignId('subject_id')->constrained('subjects')->cascadeOnDelete();
             $table->text('question');
-            $table->unsignedBigInteger('answer_id');
             $table->timestamps();
         });
 
@@ -32,12 +31,9 @@ return new class extends Migration
             $table->id();
             $table->text('option');
             $table->string('option_key')->unique();
+            $table->boolean('is_correct')->default(false);
             $table->foreignId('question_id')->constrained('questions')->cascadeOnDelete();
             $table->timestamps();
-        });
-
-        Schema::table('questions', function (Blueprint $table) {
-            $table->foreign('answer_id')->references('id')->on('options')->cascadeOnDelete();
         });
     }
 

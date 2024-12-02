@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import Alert from '@/components/Alert.vue';
 import ApplicationLogo from '@/components/ApplicationLogo.vue';
 import Dropdown from '@/components/Dropdown.vue';
 import DropdownLink from '@/components/DropdownLink.vue';
@@ -181,6 +182,24 @@ const showingNavigationDropdown = ref(false);
             >
                 <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
                     <slot name="header" />
+
+                    <div class="w-full">
+                        <Alert
+                            :message="$page.props.flash?.success"
+                            title="Success"
+                            :status="'success'"
+                        />
+                        <Alert
+                            :message="$page.props.flash?.danger"
+                            title="Error"
+                            :status="'danger'"
+                        />
+                        <Alert
+                            :message="$page.props.flash?.message"
+                            title="Message"
+                            :status="'success'"
+                        />
+                    </div>
 
                     <div id="teleport-alert" class="w-full"></div>
                 </div>

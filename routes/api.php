@@ -26,4 +26,9 @@ Route::middleware(['api'])->group(function () {
             Route::delete('logout', [AuthenticatedSessionController::class, 'destroy']);
         });
     });
+
+//    Route::middleware('auth:sanctum')->group(function () {
+//    });
+    Route::get('questions', [\App\Http\Controllers\QuestionsController::class, 'all']);
+    Route::get('questions/{test_type}', [\App\Http\Controllers\QuestionsController::class, 'all_test_type']);
 });

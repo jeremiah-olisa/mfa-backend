@@ -57,12 +57,12 @@ abstract class BaseRepository
         return $this->model->find($id);
     }
 
-    public function findBy(string $col, $value, $operator = '=')
+    public function findBy(string $col, $value, $relationship = [], $operator = '=')
     {
-        return $this->model->where($col, $operator, $value)->get();
+        return $this->model->newQuery()->where($col, $operator, $value)->with($relationship)->get();
     }
 
-    public function findOneBy(string $col, $value, array $columns = ['*'], array $relations = [],   $operator = '=')
+    public function findOneBy(string $col, $value, array $columns = ['*'], array $relations = [], $operator = '=')
     {
         // Always include the primary key if relationships are being loaded
         if (!in_array('id', $columns) && $columns !== ['*'] && !empty($relations)) {
@@ -75,9 +75,9 @@ abstract class BaseRepository
             ->first();
     }
 
-    public function findOneByOrThrow(string $col, $value, $operator = '=')
+    public function findOneByOrThrow(string $col, $value, string|array $relation = [], $select = ['*'], $operator = '=')
     {
-        return $this->model->where($col, $operator, $value)->first() ?? throw new NotFoundHttpException('Resource not found');
+        return $this->model->newQuery()->with($relation)->where($col, $operator, $value)->first($select) ?? throw new NotFoundHttpException('Resource not found');
     }
 
     public function findOneOrThrow($id, array|string $columns = ['*'])
@@ -85,7 +85,7 @@ abstract class BaseRepository
         // Ensure $columns is an array if a single column is passed as a string
         $columns = is_array($columns) ? $columns : [$columns];
 
-        return $this->model->select($columns)->where('id', '=', $id)?->first() ??  throw new NotFoundHttpException();
+        return $this->model->select($columns)->where('id', '=', $id)?->first() ?? throw new NotFoundHttpException();
     }
 
     // Find a record by specific conditions
@@ -96,7 +96,7 @@ abstract class BaseRepository
 
     /**
      * This PHP function updates a record in the database based on the provided ID and data.
-     * 
+     *
      * @param int id The `id` parameter is an integer that represents the identifier of the record you
      * want to update in the database.
      * @param array data The `` parameter in the `update` function is an array that contains the
@@ -129,23 +129,34 @@ abstract class BaseRepository
         return $model;
     }
 
-    // Get all records
-    public function all()
+    public function deleteByOrThrow(string $col, $value)
     {
-        return $this->model->all();
+        $model = $this->findOneByOrThrow($col, $value);
+
+        if ($model) {
+            $model->delete();
+        }
+
+        return $model;
+    }
+
+    // Get all records
+    public function all($columns = ['*'], string|array $relationship = [])
+    {
+        return $this->model->with($relationship)->get($columns);
     }
 
     /**
      * The `exists` function checks if a record exists in the database based on the specified column,
      * value, and operator.
-     * 
+     *
      * @param Expression column The `column` parameter in the `exists` function can accept an array, an
      * Expression object, or a string. It is used to specify the column on which the condition will be
      * applied in the database query.
      * @param string|null value The `value` parameter in the `exists` function is used to specify the value that
      * the column should be compared against in the database query. This parameter is optional and
      * defaults to `null` if not provided.
-     * @param  string operator The `` parameter in the `exists` function is used to specify the
+     * @param string operator The `` parameter in the `exists` function is used to specify the
      * comparison operator for the query. By default, it is set to the equality operator `=`. This
      * parameter allows you to customize the type of comparison you want to perform in the database
      * query.
@@ -153,24 +164,25 @@ abstract class BaseRepository
      * current condition should be combined with the previous conditions in the query. It specifies
      * whether the condition should be added as an "AND" condition or an "OR" condition when building
      * the query.
-     * 
+     *
      * @return bool The `exists` method is being called on the model with the specified conditions, and
      * the result of that method call (a boolean value indicating whether any records match the
      * conditions) is being returned.
      */
     public function exists(
         array|Expression|string $column,
-        $value = null,
-        $operator = '=',
-        string $boolean = 'and'
-    ): bool {
+                                $value = null,
+                                $operator = '=',
+        string                  $boolean = 'and'
+    ): bool
+    {
         return $this->model->where($column, $operator, $value, $boolean)->exists();
     }
 
     /**
      * The function `advancedPaginate` in PHP applies filtering, sorting, and pagination to a query
      * based on given parameters.
-     * 
+     *
      * @param array|string|null queryParams The `queryParams` parameter in the `advancedPaginate` function is used
      * to pass any filtering or sorting criteria that you want to apply to the query. It can be an
      * array, a string, or null. If provided, the function will use this information to filter and sort
@@ -178,7 +190,7 @@ abstract class BaseRepository
      * @param int perPage The `` parameter in the `advancedPaginate` function determines the number
      * of items to display per page when paginating the results. By default, it is set to 15, but you
      * can override this value by passing a different number when calling the function.
-     * 
+     *
      * @return LengthAwarePaginator The function `advancedPaginate` is returning a paginated result based on the query and
      * pagination settings. It applies filtering and sorting to the query based on the provided
      * parameters, then uses Laravel's `paginate` method to paginate the results and return them. The
@@ -200,7 +212,7 @@ abstract class BaseRepository
     /**
      * The function `advancedCursorPaginate` applies filtering, sorting, and Laravel's cursor
      * pagination to retrieve paginated results based on the provided query parameters.
-     * 
+     *
      * @param array|string|null queryParams The `queryParams` parameter in the `advancedCursorPaginate` function is
      * used to pass any additional filtering or sorting criteria that you want to apply to the query.
      * It can be an array, a string, or null. If provided, these parameters will be used to filter and
@@ -209,11 +221,21 @@ abstract class BaseRepository
      * number of items to be displayed per page when paginating the results. By default, it is set to
      * 15, but you can override this value by passing a different number as an argument when calling
      * the function.
-     * 
+     *
      * @return CursorPaginator The `advancedCursorPaginate` function returns the result of cursor pagination applied to
      * the query after filtering and sorting based on the provided query parameters or default values.
      */
     public function advancedCursorPaginate(array|string|null $queryParams = null, int $perPage = 15)
+    {
+        return $this->customAdvancedCursorPaginate($queryParams, $perPage)->cursorPaginate($perPage);
+    }
+
+    /**
+     * @param array|string|null $queryParams
+     * @param int $perPage
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function customAdvancedCursorPaginate(array|string|null $queryParams = null, int $perPage = 15): \Illuminate\Database\Eloquent\Builder
     {
         data_forget($queryParams, 'per_page');
 
@@ -222,17 +244,15 @@ abstract class BaseRepository
         // Apply filtering and sorting
         $this->applyFiltersAndSorting($query, $queryParams);
 
-        // Apply Laravel's cursor pagination
-        $perPage = max((int)($queryParams['per_page'] ?? $perPage), 1);
-        return $query->cursorPaginate($perPage);
-    }
 
+        return $query;
+    }
 
 
     /**
      * The function `applyFiltersAndSorting` processes query parameters to apply filters and sorting to
      * a database query based on model properties and allowed operators.
-     * 
+     *
      * @param \Illuminate\Database\Eloquent\Builder<static> query The `applyFiltersAndSorting` function takes a Builder instance `` and
      * an optional array or string `` as parameters. The function is responsible for
      * applying filters and sorting to the query based on the provided parameters.
@@ -240,7 +260,7 @@ abstract class BaseRepository
      * filters and sorting to a query based on the given parameters. The `queryParams` parameter is
      * expected to be an array or a string representing the query parameters that will be used to
      * filter and sort the query results.
-     * 
+     *
      * @return \Illuminate\Database\Eloquent\Builder<static> The function `applyFiltersAndSorting` returns the modified query builder object after
      * applying filters and sorting based on the provided query parameters.
      */
@@ -320,4 +340,15 @@ abstract class BaseRepository
 
         return $query;
     }
+
+    public function countBy(string $col, $value): int
+    {
+        return $this->model->newQuery()->where($col, $value)->count();
+    }
+
+    public function count(): int
+    {
+        return $this->model->newQuery()->count();
+    }
+
 }

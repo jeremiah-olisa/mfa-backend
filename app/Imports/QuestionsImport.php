@@ -61,21 +61,12 @@ class QuestionsImport implements ToModel, WithStartRow, WithValidation, SkipsEmp
 
         // Loop through options and add only non-correct answers
         foreach ($options as $key => $text) {
-            if ($key === $correctAnswerKey) {
-                // Create the correct answer directly using the correctAnswer relationship
-                $question->correctAnswer()->create([
-                    'option_key' => $key . '---' . uuid_create(),
-                    'option' => strval($text),
-                    'question_id' => $question->id,
-                ]);
-            } else {
-                // Create other options
-                $question->options()->create([
-                    'option' => $text,
-                    'option_key' => $key . '---' . uuid_create(),
-                    'question_id' => $question->id,
-                ]);
-            }
+            $question->options()->create([
+                'option' => $text,
+                'option_key' => $key . '---' . uuid_create(),
+                'question_id' => $question->id,
+                'is_correct' => $key == $correctAnswerKey,
+            ]);
         }
 
         return $question; // Return the created question
@@ -227,6 +218,8 @@ class QuestionsImport implements ToModel, WithStartRow, WithValidation, SkipsEmp
             }
 
             $flattenedMessages = array_filter($flattenedMessages, fn($message) => !strpos($message, 'The Question Text has already been used.'));
+
+            session()->flash('message', 'Please note that some questions have been uploaded. The only ones that did not upload are shown in the error.');
 
             // Use withMessages and pass the flattened messages
             throw ValidationException::withMessages($flattenedMessages);

@@ -1,34 +1,35 @@
 ﻿<script setup lang="ts">
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { formatDate } from '@/lib/utils';
-import { Head } from '@inertiajs/vue3';
+import { Head, router } from '@inertiajs/vue3';
 
 import UploadQuestionButton from '@/components/UploadQuestionButton.vue';
 import { ref } from 'vue';
 
+const props = defineProps<{
+    question: any;
+}>();
 // Sample question data (replace with your actual data fetching logic)
-const question = ref({
-    question_id: 1,
-    test_type: 'Multiple Choice',
-    subject: 'Science',
-    question: 'What is the chemical symbol for water?',
-    uploaded_at: '2023-05-01T10:00:00Z',
-    updated_at: '2023-05-02T15:30:00Z',
-    answer_id: 2,
-    options: [
-        { id: 1, text: 'H2O2' },
-        { id: 2, text: 'H2O' },
-        { id: 3, text: 'CO2' },
-        { id: 4, text: 'NaCl' },
-    ],
-});
+const question = ref(props.question);
 
-function deleteQuestion() {
-    // Implement your delete logic here
-    console.log('Deleting question:', question.value.question_id);
-    // You might want to show a confirmation dialog before actually deleting
-    // After deletion, you could redirect to a question list page
-}
+const deleteQuestion = async () => {
+    if (confirm('Are you sure you want to delete this question?')) {
+        try {
+            // Send the DELETE request via Inertia
+            router.delete(
+                route('questions.destroy', {
+                    question_id: props.question.question_id,
+                }),
+            );
+            console.log('Question deleted successfully');
+
+            // Optionally redirect after deletion
+            router.visit(route('questions.list')); // Replace with your question list route
+        } catch (error) {
+            console.error('Error deleting question:', error);
+        }
+    }
+};
 </script>
 
 <template>
@@ -36,7 +37,9 @@ function deleteQuestion() {
 
     <AuthenticatedLayout>
         <template #header>
-            <div class="flex gap-y-3 w-full flex-wrap items-center justify-between">
+            <div
+                class="flex w-full flex-wrap items-center justify-between gap-y-3"
+            >
                 <h2
                     class="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200"
                 >
@@ -70,23 +73,35 @@ function deleteQuestion() {
                                 </button>
                             </div>
 
-                            <div class="space-y-4">
-                                <div>
+                            <div class="grid gap-4 space-y-4 md:grid-cols-2">
+                                <!--                                <div>-->
+                                <!--                                    <label-->
+                                <!--                                        class="block text-sm font-medium text-gray-700 dark:text-gray-300"-->
+                                <!--                                        >Question ID</label-->
+                                <!--                                    >-->
+                                <!--                                    <p-->
+                                <!--                                        class="mt-1 text-lg text-gray-900 dark:text-gray-100"-->
+                                <!--                                    >-->
+                                <!--                                        {{ question.question_id }}-->
+                                <!--                                    </p>-->
+                                <!--                                </div>-->
+
+                                <div class="col-span-full">
                                     <label
                                         class="block text-sm font-medium text-gray-700 dark:text-gray-300"
-                                        >Question ID</label
+                                        >Question</label
                                     >
                                     <p
                                         class="mt-1 text-lg text-gray-900 dark:text-gray-100"
                                     >
-                                        {{ question.question_id }}
+                                        {{ question.question }}
                                     </p>
                                 </div>
 
                                 <div>
                                     <label
                                         class="block text-sm font-medium text-gray-700 dark:text-gray-300"
-                                        >Test Type</label
+                                        >Exam Type</label
                                     >
                                     <p
                                         class="mt-1 text-lg text-gray-900 dark:text-gray-100"
@@ -103,19 +118,19 @@ function deleteQuestion() {
                                     <p
                                         class="mt-1 text-lg text-gray-900 dark:text-gray-100"
                                     >
-                                        {{ question.subject }}
+                                        {{ question.subject.label }}
                                     </p>
                                 </div>
 
-                                <div>
+                                <div v-if="question.section">
                                     <label
                                         class="block text-sm font-medium text-gray-700 dark:text-gray-300"
-                                        >Question</label
+                                        >Section</label
                                     >
                                     <p
                                         class="mt-1 text-lg text-gray-900 dark:text-gray-100"
                                     >
-                                        {{ question.question }}
+                                        {{ question.section }}
                                     </p>
                                 </div>
 
@@ -127,7 +142,7 @@ function deleteQuestion() {
                                     <p
                                         class="mt-1 text-lg text-gray-900 dark:text-gray-100"
                                     >
-                                        {{ formatDate(question.uploaded_at) }}
+                                        {{ formatDate(question.created_at) }}
                                     </p>
                                 </div>
 
@@ -143,7 +158,10 @@ function deleteQuestion() {
                                     </p>
                                 </div>
 
-                                <div>
+                                <div
+                                    v-if="question.options.length > 0"
+                                    class="col-span-full"
+                                >
                                     <label
                                         class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
                                         >Options</label
@@ -156,13 +174,10 @@ function deleteQuestion() {
                                         >
                                             <span
                                                 class="text-gray-900 dark:text-gray-100"
-                                                >{{ option.text }}</span
+                                                >{{ option.option }}</span
                                             >
                                             <span
-                                                v-if="
-                                                    option.id ===
-                                                    question.answer_id
-                                                "
+                                                v-if="option.is_correct"
                                                 class="rounded-full bg-green-500 px-2 py-1 text-sm text-white"
                                             >
                                                 Correct

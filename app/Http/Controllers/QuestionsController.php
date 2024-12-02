@@ -2,26 +2,53 @@
 
 namespace App\Http\Controllers;
 
+use App\Constants\SetupConstant;
+use App\Http\Requests\GetQuestionsRequest;
 use App\Imports\QuestionsImport;
-use App\Repositories\QuestionRepository;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Resources\Json\JsonResource;
+use App\Repositories\{QuestionRepository, SubjectRepository};
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 use Maatwebsite\Excel\Facades\Excel;
+use Symfony\Component\HttpFoundation\Response as ResponseAlias;
 
 class QuestionsController extends Controller
 {
     protected QuestionRepository $questionRepository;
+    protected SubjectRepository $subjectRepository;
 
-    public function __construct(QuestionRepository $questionRepository)
+    public function __construct(QuestionRepository $questionRepository, SubjectRepository $subjectRepository)
     {
         $this->questionRepository = $questionRepository;
+        $this->subjectRepository = $subjectRepository;
     }
 
-    public function list(Request $request): Response
+    public function all(Request $request)
     {
-        $response = $this->questionRepository->advancedCursorPaginate($request, $request->query('per_page') ?? 15);
+        $allQuestions = $this->questionRepository->all(relationship: ['subject:id,label', 'options']);
+
+        $data = ['questions' => $allQuestions];
+
+        return new JsonResponse($data);
+    }
+
+    public function all_test_type($test_type)
+    {
+        $allQuestions = $this->questionRepository->findBy('test_type', $test_type, relationship: ['subject:id,label', 'options']);
+
+        $data = ['questions' => $allQuestions];
+
+        return new JsonResponse($data);
+    }
+
+    public function list(GetQuestionsRequest $request)
+    {
+        $validatedQuery = $request->validated();
+        $response = $this->questionRepository->getPaginatedQuestionsWithSubject($validatedQuery, $request->query('per_page') ?? 15);
+        $subjects = $this->subjectRepository->all(['id', 'label']);
 
         $pagination = [
             'next_page_url' => $response->nextPageUrl(),
@@ -29,18 +56,43 @@ class QuestionsController extends Controller
             'per_page' => $response->perPage(),
             'current_page' => $response->path(),
             'has_more_pages' => $response->hasMorePages(),
+            'path' => $response->path(),
+            'with_query_string' => $response->withQueryString(),
         ];
 
-        return Inertia::render('Questions/List', [
+        $data = [
             'questions' => $response->items(),
             'pagination' => $pagination,
-        ]);
+            'subjects' => $subjects,
+            'exams' => SetupConstant::$exams
+        ];
+
+        if (!$request->wantsJson())
+            return Inertia::render('Questions/List', $data);
+
+        return new JsonResponse($data);
     }
 
 
-    public function details(Request $request): Response
+    public function details($question_id, Request $request)
     {
-        return Inertia::render('Questions/Details');
+        $question = $this->questionRepository->findOneByOrThrow('question_id', $question_id, ['options', 'subject:id,label']);
+
+        $data = ['question' => $question];
+        if (!$request->wantsJson())
+            return Inertia::render('Questions/Details', $data);
+
+        return new JsonResponse($data);
+    }
+
+    public function destroy($question_id, Request $request)
+    {
+        $this->questionRepository->deleteQuestionsByOrThrow('question_id', $question_id);
+
+        if (!$request->wantsJson())
+            return redirect()->back()->with('success', 'Question deleted successfully.');
+
+        return new JsonResponse([], ResponseAlias::HTTP_NO_CONTENT);
     }
 
     /**
@@ -54,6 +106,6 @@ class QuestionsController extends Controller
         $import->handleErrorsAndFailures();
 
 
-        return back()->with('success', 'Questions uploaded successfully.');
+        return redirect()->back()->with('success', 'Questions uploaded successfully . ');
     }
 }

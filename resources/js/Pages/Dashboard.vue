@@ -1,8 +1,42 @@
 <script setup lang="ts">
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import StatCard from '@/components/StatCard.vue';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head } from '@inertiajs/vue3';
 import { BookOpenCheck, Users } from 'lucide-vue-next';
+
+const $props = defineProps<{
+    questions: number;
+    WAEC: number;
+    NECO: number;
+    JAMB: number;
+    users: number;
+    students: number;
+    admins: number;
+    content_managers: number;
+}>();
+
+const cardStats = [
+    {
+        title: 'Total Users',
+        icon: Users,
+        mainValue: $props.users,
+        stats: [
+            { label: 'Students', value: $props.students },
+            { label: 'Admins', value: $props.admins },
+            { label: 'Content Managers', value: $props.content_managers },
+        ],
+    },
+    {
+        title: 'Total Questions',
+        icon: BookOpenCheck,
+        mainValue: $props.questions,
+        stats: [
+            { label: 'WAEC', value: $props.WAEC },
+            { label: 'NECO', value: $props.NECO },
+            { label: 'JAMB', value: $props.JAMB },
+        ],
+    },
+];
 </script>
 
 <template>
@@ -20,38 +54,14 @@ import { BookOpenCheck, Users } from 'lucide-vue-next';
         <div class="py-12">
             <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
                 <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                    <Card>
-                        <CardHeader
-                            class="flex flex-row items-center justify-between space-y-0 pb-2"
-                        >
-                            <CardTitle class="text-sm font-medium">
-                                Total Students
-                            </CardTitle>
-                            <Users :size="24" />
-                        </CardHeader>
-                        <CardContent>
-                            <div class="text-2xl font-bold">45</div>
-                            <!--                            <p class="text-xs text-muted-foreground">-->
-                            <!--                                +20.1% from last month-->
-                            <!--                            </p>-->
-                        </CardContent>
-                    </Card>
-                    <Card>
-                        <CardHeader
-                            class="flex flex-row items-center justify-between space-y-0 pb-2"
-                        >
-                            <CardTitle class="text-sm font-medium">
-                                Total Questions
-                            </CardTitle>
-                            <BookOpenCheck :size="24" />
-                        </CardHeader>
-                        <CardContent>
-                            <div class="text-2xl font-bold">45</div>
-                            <!--                            <p class="text-xs text-muted-foreground">-->
-                            <!--                                +20.1% from last month-->
-                            <!--                            </p>-->
-                        </CardContent>
-                    </Card>
+                    <StatCard
+                        v-for="(card, index) in cardStats"
+                        :key="index"
+                        :title="card.title"
+                        :icon="card.icon"
+                        :mainValue="card.mainValue"
+                        :stats="card.stats"
+                    />
                 </div>
             </div>
         </div>
