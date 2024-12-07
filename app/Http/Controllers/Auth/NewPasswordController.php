@@ -13,6 +13,7 @@ use Illuminate\Validation\Rules;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
+use Symfony\Component\HttpFoundation\JsonResponse;
 
 class NewPasswordController extends Controller
 {
@@ -32,7 +33,7 @@ class NewPasswordController extends Controller
      *
      * @throws \Illuminate\Validation\ValidationException
      */
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request)
     {
         $request->validate([
             'token' => 'required',
@@ -59,6 +60,9 @@ class NewPasswordController extends Controller
         // the application's home authenticated view. If there is an error we can
         // redirect them back to where they came from with their error message.
         if ($status == Password::PASSWORD_RESET) {
+            if ($request->wantsJson())
+                return new JsonResponse(['message' => 'Password changed successfully']);
+
             return redirect()->route('login')->with('status', __($status));
         }
 

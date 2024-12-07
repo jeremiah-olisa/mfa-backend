@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -13,7 +14,7 @@ class PasswordController extends Controller
     /**
      * Update the user's password.
      */
-    public function update(Request $request): RedirectResponse
+    public function update(Request $request)
     {
         $validated = $request->validate([
             'current_password' => ['required', 'current_password'],
@@ -24,6 +25,9 @@ class PasswordController extends Controller
             'password' => Hash::make($validated['password']),
         ]);
 
-        return back();
+        if (!$request->wantsJson())
+            return back();
+
+        return new JsonResponse(['message' => 'Password updated successfully.']);
     }
 }

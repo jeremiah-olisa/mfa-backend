@@ -128,6 +128,11 @@ abstract class BaseRepository
         return $model;
     }
 
+    public function upsert(array $data, array $uniqueBy, array $update = [])
+    {
+        return $this->model->newQuery()->upsert($data, $uniqueBy, $update);
+    }
+
     // Delete a record by its ID
     public function delete($id)
     {

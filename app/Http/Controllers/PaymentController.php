@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 
 namespace App\Http\Controllers;
 
@@ -25,10 +25,10 @@ class PaymentController extends Controller
     public function getPaymentLinkByPlanId(int $plan_id)
     {
         return $this->handleErrors(function () use ($plan_id) {
-            $paymentLink = $this->paymentService->getPaymentLinkByPlanId($plan_id);
+            $response = $this->paymentService->getPaymentLinkByPlanId($plan_id);
             return $this->api_response(
                 'Payment link generated successfully.',
-                ['payment_link' => $paymentLink],
+                $response,
                 201
             );
         });
@@ -49,20 +49,19 @@ class PaymentController extends Controller
     /**
      * Verify payment using the transaction reference
      *
-     * @param string $reference
+     *
      * @return \Illuminate\Http\JsonResponse
      * @throws ValidationException
+     * @throws \Throwable
      */
-    public function verifyPayment(string $reference)
+    public function verifyPayment($reference)
     {
-        return $this->handleErrors(function () use ($reference) {
-            $result = $this->paymentService->verifyPayment($reference);
-            return $this->api_response(
-                'Payment verified successfully.',
-                $result,
-                200
-            );
-        });
+        $result = $this->paymentService->verifyPayment($reference);
+        return $this->api_response(
+            'Payment verified successfully.',
+            ['data' => $result],
+            200
+        );
     }
 
     /**
@@ -140,3 +139,4 @@ class PaymentController extends Controller
         });
     }
 }
+

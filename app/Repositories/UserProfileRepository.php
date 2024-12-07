@@ -24,17 +24,17 @@ class UserProfileRepository extends BaseRepository
         $user = $this->findOneByOrThrow('user_id', $userId);
 
 
-        $currentExpiry = $user->expires_at;
+        $currentExpiry = $user->plan_expires_at;
 
         if ($currentExpiry && Carbon::parse($currentExpiry)->isFuture()) {
-            $user->expires_at = Carbon::parse($currentExpiry)->addDays($duration);
+            $user->plan_expires_at = Carbon::parse($currentExpiry)->addDays($duration);
         } else {
-            $user->expires_at = now()->addDays($duration);
+            $user->plan_expires_at = now()->addDays($duration);
         }
 
         $user->save();
 
-        return $user->expires_at;
+        return $user->plan_expires_at;
     }
 
 }

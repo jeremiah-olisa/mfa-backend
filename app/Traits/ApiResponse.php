@@ -7,11 +7,11 @@ use Symfony\Component\HttpFoundation\Response;
 
 trait ApiResponse
 {
-    public function api_response(string $message, array|int|string $data, int $code = 200): \Illuminate\Http\JsonResponse
+    public function api_response(string $message, array|int|string|null $data = null, int $code = 200): \Illuminate\Http\JsonResponse
     {
         $statusText = Response::$statusTexts[$code] ?? 'Unknown status';
         $status = $code . " " . $statusText;
-        return response()->json(array_merge(['status' => $status, 'message' => $message], $data), $code);
+        return response()->json(array_merge(['status' => $status, 'message' => $message], $data ?? []), $code);
     }
 
     public function paginated_response($response): array

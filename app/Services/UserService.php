@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 
 namespace App\Services;
 
@@ -23,45 +23,44 @@ class UserService
      * Update the user's email, name, and profile data.
      *
      * @param array $data
-     * @return \App\Models\User
+     * @return array
      */
-    public function updateUserProfile(array $data)
+    public function updateUserProfile(array $data, int|string|null $user_id = null)
     {
         DB::beginTransaction();
 
         try {
             // Fetch user by ID
-            $user = $this->userRepository->findOneByOrThrow('id', Auth::id());
-
+            $userId = $user_id ?? Auth::id();
+            $user = $this->userRepository->findOneByOrThrow('id', $userId, [], ['id']);
             // Prepare the data for User model (email, name)
-            $updateData = [];
-            if (isset($data['email'])) {
-                $updateData['email'] = $data['email'];
-            }
-
-            if (isset($data['name'])) {
-                $updateData['name'] = $data['name'];
-            }
+            $updateData = $this->extractUpdateUserData($data);
 
             // Update User model if data exists
             if (!empty($updateData)) {
-                $this->userRepository->update($user, $updateData);
+                $user = $this->userRepository->update($userId, $updateData);
             }
 
             // Prepare the data for UserProfile model
             $profileData = [
+                'user_id' => $userId,
                 'phone' => $data['phone'] ?? null,
                 'parent_email' => $data['parent_email'] ?? null,
                 'parent_phone' => $data['parent_phone'] ?? null,
             ];
 
             // Update UserProfile model
-            $this->userProfileRepository->updateBy('user_id', $user->id, $profileData);
+            $this->userProfileRepository->upsert(
+                [$profileData], // Data
+                ['user_id'],    // Unique constraint columns
+                ['phone', 'parent_email', 'parent_phone'] // Columns to update
+            );
+
 
             // Commit the transaction if everything is successful
             DB::commit();
 
-            return $user;
+            return array_merge($user->toArray(), ['profile' => $profileData]);
 
         } catch (\Exception $e) {
             // Rollback the transaction if any error occurs
@@ -70,5 +69,22 @@ class UserService
             // Optionally, log the exception or rethrow it
             throw new \Exception("Error updating profile: " . $e->getMessage());
         }
+    }
+
+    /**
+     * @param array $data
+     * @return array
+     */
+    protected function extractUpdateUserData(array $data): array
+    {
+        $updateData = [];
+        if (isset($data['email'])) {
+            $updateData['email'] = $data['email'];
+        }
+
+        if (isset($data['first_name']) || isset($data['last_name'])) {
+            $updateData['name'] = trim($data['first_name'] . ' ' . $data['last_name']);
+        }
+        return $updateData;
     }
 }

@@ -14,7 +14,8 @@ class UpdateUserProfileRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['required', 'string', 'max:255'],
+            'first_name' => ['required', 'string', 'max:50'],
+            'last_name' => ['required', 'string', 'max:50'],
             'email' => ['required', 'email', 'max:255', 'unique:users,email,' . $this->user()->id], // Unique constraint, excluding the current user's email
             'phone' => ['nullable', 'string', 'regex:/^\+?[0-9]{10,15}$/'], // Optional phone number, should be a valid phone number
             'parent_email' => ['nullable', 'email', 'max:255'],

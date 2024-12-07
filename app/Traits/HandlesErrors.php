@@ -2,6 +2,7 @@
 
 namespace App\Traits;
 
+use Nette\Schema\ValidationException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Throwable;
 
@@ -11,7 +12,7 @@ trait HandlesErrors
     {
         try {
             return $callback();
-        } catch (\Exception|Throwable|HttpException $e) {
+        }  catch (\Exception|Throwable|HttpException $e) {
             $statusCode = method_exists($e, 'getStatusCode') ? $e->getStatusCode() : 500;
             return $this->api_response(
                 $errorMessage ?? "Something went wrong",

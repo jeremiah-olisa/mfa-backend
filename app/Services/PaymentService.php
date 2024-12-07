@@ -1,62 +1,71 @@
-﻿<?php
+<?php
 
 namespace App\Services;
+
 
 use App\Repositories\PaymentPlanRepository;
 use App\Repositories\PaymentRepository;
 use App\Repositories\UserProfileRepository;
 use App\Repositories\UserRepository;
+use GuzzleHttp\Exception\ClientException;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 use Unicodeveloper\Paystack\Exceptions\PaymentVerificationFailedException;
 use Unicodeveloper\Paystack\Paystack;
 use Illuminate\Validation\ValidationException;
 
-class PaymentService
+class PaymentService extends Paystack
 {
 
     protected PaymentRepository $paymentRepository;
     protected PaymentPlanRepository $paymentPlanRepository;
     protected UserRepository $userRepository;
     protected UserProfileRepository $userProfileRepository;
-    protected Paystack $paystackService;
 
-    public function __construct(PaymentRepository $paymentRepository, PaymentPlanRepository $paymentPlanRepository, UserRepository $userRepository, Paystack $paystackService, UserProfileRepository $userProfileRepository)
+//    protected Paystack $paystackService;
+
+    public function __construct(PaymentRepository $paymentRepository, PaymentPlanRepository $paymentPlanRepository, UserRepository $userRepository, UserProfileRepository $userProfileRepository)
     {
         $this->paymentRepository = $paymentRepository;
         $this->paymentPlanRepository = $paymentPlanRepository;
         $this->userRepository = $userRepository;
-        $this->paystackService = $paystackService;
+//        $this->paystackService = $paystackService;
         $this->userProfileRepository = $userProfileRepository;
+        parent::__construct();
     }
 
     // pay/{plan_id}
-    public function getPaymentLinkByPlanId(int $plan_id): Paystack
+    public function getPaymentLinkByPlanId(int $plan_id)
     {
         $amount = $this->paymentPlanRepository->getPlanAmountByPlanId($plan_id) * 100; // convert to kobo
         $user_id = Auth::id() ?? throw new UnauthorizedHttpException("", "You don't have authorization to access this page");
         $user = $this->userRepository->findOneBy('id', $user_id, ['email']);
-        $reference = $this->paystackService->genTranxRef();
+        $reference = $this->genTranxRef();
 
 
-        $payment_link = $this->paystackService->getAuthorizationUrl([
+        $paystack = $this->getAuthorizationUrl([
             'amount' => $amount,
             'email' => $user['email'],
             'reference' => $reference,
-            'callback_url' => route('payment.callback'),
+            'callback_url' => route('verifyPayment', ['reference' => $reference]),
         ]);
 
         $payment = $this->paymentRepository->create([
             'status' => 'pending',
             'user_id' => $user_id,
-            'plan_id' => $plan_id,
+            'payment_plan_id' => $plan_id,
             'reference' => $reference,
             'amount' => $amount
         ]);
 
-        return $payment_link;
+        return [
+            'paystack' => $paystack,
+            'payment' => $payment,
+            'reference' => $reference
+        ];
 
     }
 
@@ -68,28 +77,26 @@ class PaymentService
      */
     public function verifyPayment(string $reference)
     {
+        // Verify the transaction with Paystack
+        $paymentDetails = $this->verifyPaystackPayment($reference);
+
+        if (!$paymentDetails || !$paymentDetails['status'])
+            throw ValidationException::withMessages(["paystack" => "Payment verification failed for reference: {$reference}."]);
+
         DB::beginTransaction();
-
         try {
-            // Verify the transaction with Paystack
-            $paymentDetails = $this->verifyPaystackPayment($reference);
-
-            if (!$paymentDetails || $paymentDetails['status'] !== 'success')
-                throw  ValidationException::withMessages(["Payment verification failed for reference: {$reference}."]);
-
-
             // Retrieve the payment record
             $payment = $this->paymentRepository->markPaymentAsPaid($reference);
 
-            $duration = $this->paymentPlanRepository->getPlanDurationByPlanId($payment->plan_id);
+            $duration = $this->paymentPlanRepository->getPlanDurationByPlanId($payment->payment_plan_id);
 
             $expires_at = $this->userProfileRepository->updateExpiry($payment->user_id, $duration);
 
             DB::commit();
 
             return [
-                'expires_at' => $expires_at,
-                'payment_id' => $payment->id,
+                'plan_expires_at' => $expires_at,
+                'payment_plan_id' => $payment->id,
                 'user_id' => $payment->user_id,
             ];
         } catch (\Throwable $e) {
@@ -128,12 +135,31 @@ class PaymentService
     private function verifyPaystackPayment(string $reference): array
     {
         try {
-
-            request()->merge(['trxref' => $reference]);
-            return $this->paystackService->getPaymentData();
+            return $this->getPaymentData_v2($reference);
         } catch (PaymentVerificationFailedException $exception) {
             throw  ValidationException::withMessages([$exception->getMessage()]);
+        } catch (ClientException  $e) {
+            $message = json_decode($e->getResponse()->getBody()->getContents(), true);
+            throw ValidationException::withMessages([$message['message']]);
+        } catch (\Exception|Throwable|HttpException $e) {
+            $statusCode = method_exists($e, 'getStatusCode') ? $e->getStatusCode() : 500;
+
+            throw  new HttpException($statusCode, $e->getMessage(), $e);
         }
+    }
+
+    private function getPaymentData_v2($reference)
+    {
+        if ($this->isTransactionVerificationValid($reference)) {
+            return $this->getResponse();
+        } else {
+            throw new PaymentVerificationFailedException("Invalid Transaction Reference");
+        }
+    }
+
+    private function getResponse()
+    {
+        return json_decode($this->response->getBody(), true);
     }
 
 

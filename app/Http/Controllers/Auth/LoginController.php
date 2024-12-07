@@ -38,6 +38,7 @@ class LoginController extends Controller
     protected $redirectTo = '/dashboard';
     protected UserRepository $userRepository;
     // protected UserAppRepository $userAppRepository;
+
     /**
      * Create a new controller instance.
      *
@@ -54,11 +55,12 @@ class LoginController extends Controller
     protected function validateLogin(Request $request): array
     {
         return $request->validate([
-            $this->username() => 'required|string' . $this->username() == "email" ? "|email" : "",
+            $this->username() => 'required|string',
             'password' => 'required|string|min:6',
             'app' => 'required|string|in:' . implode(',', SetupConstant::$apps),
         ]);
     }
+
     public function login(Request $request)
     {
         // Validate login request
@@ -89,7 +91,7 @@ class LoginController extends Controller
                     'parent_phone' => $studentDetails['parent_phone'] ?? null,
                     'plan' => $studentDetails['plan'] ?? null,
                     'plan_duration' => isset($studentDetails['plan_duration'])
-                        ? (int) filter_var($studentDetails['plan_duration'], FILTER_VALIDATE_INT)
+                        ? (int)filter_var($studentDetails['plan_duration'], FILTER_VALIDATE_INT)
                         : null,
                     'plan_started_at' => $studentDetails['plan_started_at'] ?? null,
                     'plan_expires_at' => $studentDetails['plan_expires_at'] ?? null,
@@ -144,7 +146,6 @@ class LoginController extends Controller
 
         return $this->sendFailedLoginResponse($request);
     }
-
 
 
     public function fetchStudentDetails(string $value, string $name = 'email')
@@ -204,7 +205,7 @@ class LoginController extends Controller
             return $response;
         }
 
-        return new JsonResponse($responseData, 200);
+        return $this->api_response('Login Successful', ['data' => $responseData], 200);
     }
 
 
@@ -224,12 +225,13 @@ class LoginController extends Controller
 
         $user = $this->userRepository->findByEmail($cred[$this->username()]);
 
-        if (!$user || !Hash::check($cred['password'], $user->password)) {
-            $message = 'The provided credentials are incorrect.';
-            throw new UnauthorizedHttpException("Bearer", $message);
-        }
 
-        return Auth::loginUsingId($user, $request->boolean('remember'));
+        if ($user && Hash::check($cred['password'], $user->password))
+            return Auth::loginUsingId($user->id, $request->boolean('remember'));
+
+
+        $message = 'The provided credentials are incorrect.';
+        throw new UnauthorizedHttpException("Bearer", $message);
     }
 
     /**

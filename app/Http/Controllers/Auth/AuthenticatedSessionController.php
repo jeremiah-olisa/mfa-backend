@@ -39,10 +39,13 @@ class AuthenticatedSessionController extends LoginController
     public function destroy(Request $request)
     {
 
-        Auth::guard($request->wantsJson() ? 'api' : 'web')->logout();
+        if (!$request->wantsJson())
+            Auth::guard('web')->logout();
+        else
+            Auth::guard('api')->user()->currentAccessToken()->delete();
 
         if ($request->wantsJson()) {
-            return new JsonResponse([], 204);
+            return $this->api_response('Logout Successful', [], 200);
         }
 
         $request->session()->invalidate();

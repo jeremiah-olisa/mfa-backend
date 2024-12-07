@@ -48,7 +48,7 @@ class RegisterController extends Controller
     /**
      * Get a validator for an incoming registration request.
      *
-     * @param  array  $data
+     * @param array $data
      * @return \Illuminate\Contracts\Validation\Validator
      */
     protected function validator(array $data)
@@ -65,7 +65,7 @@ class RegisterController extends Controller
     /**
      * Create a new user instance after a valid registration.
      *
-     * @param  array  $data
+     * @param array $data
      * @return \App\Models\User
      */
     protected function create(array $data)
@@ -79,27 +79,27 @@ class RegisterController extends Controller
 
         // Check if the user already exists
         $user = $this->userRepository->findByEmail($requestData['email']);
-        
+
         if ($user) {
             // User exists, check if they are registered for the app
             $app = $requestData['app'] ?? null; // Ensure the app is in the request data
-            
+
             if ($app && !$user->userApps()->where('app', $app)->exists()) {
                 // Attach the app to the user
                 $user->userApps()->create(['app' => $app]);
             }
-            
+
             // Log in the existing user
             $this->guard()->login($user);
-            
+
             return $request->wantsJson()
-            ? new JsonResponse(['message' => 'User registered for the app and logged in.'], 200)
-            : redirect($this->redirectPath());
+                ? new JsonResponse(['message' => 'User registered for the app and logged in.'], 200)
+                : redirect($this->redirectPath());
         }
-        
+
         // If user does not exist, proceed with the normal registration flow
         event(new Registered($user = $this->create($requestData)));
-    
+
         // Attach the app to the newly registered user
         $app = $requestData['app'] ?? null;
         if ($app) {
@@ -113,7 +113,7 @@ class RegisterController extends Controller
         }
 
         return $request->wantsJson()
-            ? new JsonResponse([], 201)
-            : redirect($this->redirectPath());
+            ? $this->api_response('Registration successful', null, 201) :
+            redirect($this->redirectPath());
     }
 }
