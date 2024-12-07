@@ -32,3 +32,6 @@ Route::middleware(['api'])->group(function () {
     Route::get('questions', [\App\Http\Controllers\QuestionsController::class, 'all']);
     Route::get('questions/{test_type}', [\App\Http\Controllers\QuestionsController::class, 'all_test_type']);
 });
+
+require __DIR__ . '/payment.php';
+

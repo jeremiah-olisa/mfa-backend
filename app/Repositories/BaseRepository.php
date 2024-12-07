@@ -118,6 +118,16 @@ abstract class BaseRepository
         return $model;
     }
 
+    public function updateBy(string $col, mixed $value, array $data, string|array $cols = ['*'])
+    {
+        $model = $this->findOneByOrThrow($col, $value, [], $cols);
+        if ($model) {
+            $model->update($data);
+        }
+
+        return $model;
+    }
+
     // Delete a record by its ID
     public function delete($id)
     {
