@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import FormErrorAlert from '@/components/FormErrorAlert.vue';
-import InputError from '@/Components/InputError.vue';
+import InputError from '@/components/InputError.vue';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';

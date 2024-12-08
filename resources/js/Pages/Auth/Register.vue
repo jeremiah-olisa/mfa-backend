@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import InputError from '@/Components/InputError.vue';
+import InputError from '@/components/InputError.vue';
 import GuestLayout from '@/Layouts/GuestLayout.vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
