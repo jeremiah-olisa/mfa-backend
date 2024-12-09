@@ -18,7 +18,7 @@ class UserProfileRepository extends BaseRepository
         parent::__construct($userProfile);
     }
 
-    public function updateExpiry(int $userId, int $duration)
+    public function updateExpiry(int $userId, int $duration, string $plan)
     {
         // Retrieve the user profile by user ID
         $user = $this->findOneByOrThrow('user_id', $userId);
@@ -32,6 +32,7 @@ class UserProfileRepository extends BaseRepository
             $user->plan_expires_at = now()->addDays($duration);
         }
 
+        $user->plan = $plan;
         $user->save();
 
         return $user->plan_expires_at;

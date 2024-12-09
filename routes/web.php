@@ -6,6 +6,7 @@ use App\Http\Controllers\{ProfileController, QuestionsController};
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use App\Http\Controllers\PaymentController;
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [
@@ -29,6 +30,11 @@ Route::get('/dashboard', function (QuestionRepository $questionRepository, UserR
     ]);
 })->middleware(['auth', 'verified'])->name('dashboard');
 
+
+Route::get('payments/verify/{reference}', [PaymentController::class, 'verifyPayment'])->name('verifyPayment');
+Route::prefix('payment')->group(function () {
+    Route::get('/success', [\App\Http\Controllers\PaymentController::class, 'success'])->name('payment.success');
+});
 Route::middleware('auth')->group(function () {
     Route::prefix('questions')->group(function () {
         Route::get('/', [QuestionsController::class, 'list'])->name('questions.list');

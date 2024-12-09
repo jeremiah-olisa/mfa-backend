@@ -25,6 +25,7 @@ Route::middleware(['api'])->group(function () {
         Route::middleware('auth:sanctum')->group(function () {
             Route::patch('change-password', [PasswordController::class, 'update']);
             Route::delete('logout', [AuthenticatedSessionController::class, 'destroy']);
+            Route::get('user', [UserController::class, 'getCurrentUserProfile']);
             Route::patch('user', [UserController::class, 'update']);
         });
     });

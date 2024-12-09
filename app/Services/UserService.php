@@ -71,6 +71,15 @@ class UserService
         }
     }
 
+    public function getCurrentUserProfile()
+    {
+        $userId = Auth::id();
+
+        return $this->userRepository->getUserProfileByUserId($userId);
+
+    }
+
+
     /**
      * @param array $data
      * @return array

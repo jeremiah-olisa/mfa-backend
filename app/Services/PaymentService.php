@@ -46,25 +46,31 @@ class PaymentService extends Paystack
         $reference = $this->genTranxRef();
 
 
-        $paystack = $this->getAuthorizationUrl([
+        $paystackData = [
             'amount' => $amount,
             'email' => $user['email'],
             'reference' => $reference,
             'callback_url' => route('verifyPayment', ['reference' => $reference]),
-        ]);
+            "metadata" => [
+                "cancel_action" => "https://standard.paystack.co/close"
+            ]
+        ];
+        $paystack = $this->getAuthorizationUrl($paystackData);
 
         $payment = $this->paymentRepository->create([
             'status' => 'pending',
             'user_id' => $user_id,
             'payment_plan_id' => $plan_id,
             'reference' => $reference,
-            'amount' => $amount
+            'amount' => $amount,
+            'payment_method' => $paystack?->url ?? null,
         ]);
 
         return [
             'paystack' => $paystack,
             'payment' => $payment,
-            'reference' => $reference
+            'reference' => $reference,
+            "metadata" => $paystackData["metadata"],
         ];
 
     }
@@ -89,14 +95,16 @@ class PaymentService extends Paystack
             $payment = $this->paymentRepository->markPaymentAsPaid($reference);
 
             $duration = $this->paymentPlanRepository->getPlanDurationByPlanId($payment->payment_plan_id);
+            $payment_plan = $this->paymentPlanRepository->getPlanNameByPlanId($payment->payment_plan_id);
 
-            $expires_at = $this->userProfileRepository->updateExpiry($payment->user_id, $duration);
+            $expires_at = $this->userProfileRepository->updateExpiry($payment->user_id, $duration, $payment_plan);
 
             DB::commit();
 
             return [
                 'plan_expires_at' => $expires_at,
-                'payment_plan_id' => $payment->id,
+                'payment_plan_id' => $payment->payment_plan_id,
+                'payment_plan' => $payment_plan,
                 'user_id' => $payment->user_id,
             ];
         } catch (\Throwable $e) {

@@ -21,4 +21,9 @@ class PaymentPlanRepository extends BaseRepository
     {
         return $this->model->newQuery()->where('id', $plan_Id)->valueOrFail('duration');
     }
+
+    public function getPlanNameByPlanId(int $plan_Id): string
+    {
+        return $this->model->newQuery()->where('id', $plan_Id)->valueOrFail('name');
+    }
 }

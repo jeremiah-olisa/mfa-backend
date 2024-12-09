@@ -23,4 +23,12 @@ class UserController extends Controller
 
         return $this->api_response('User profile updated successfully.', ['data' => $userProfile]);
     }
+
+
+    public function getCurrentUserProfile()
+    {
+        $user = $this->userService->getCurrentUserProfile();
+
+        return $this->api_response('Profile retrieved successfully', ['data' => $user]);
+    }
 }

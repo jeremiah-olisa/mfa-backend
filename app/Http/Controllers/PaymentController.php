@@ -4,8 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\GetPaymentHistoryRequest;
 use App\Services\PaymentService;
+use Carbon\Carbon;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
+use Inertia\Inertia;
+use Inertia\Response;
 
 class PaymentController extends Controller
 {
@@ -50,18 +55,40 @@ class PaymentController extends Controller
      * Verify payment using the transaction reference
      *
      *
-     * @return \Illuminate\Http\JsonResponse
+     * @return \Illuminate\Http\JsonResponse|RedirectResponse
      * @throws ValidationException
      * @throws \Throwable
      */
-    public function verifyPayment($reference)
+    public function verifyPayment($reference, Request $request)
     {
         $result = $this->paymentService->verifyPayment($reference);
-        return $this->api_response(
-            'Payment verified successfully.',
-            ['data' => $result],
-            200
-        );
+
+        // Ensure the plan expiry date is formatted for readability
+        $formattedExpiryDate = Carbon::parse($result['plan_expires_at'])->toFormattedDateString();
+
+        $message = "You paid for the '{$result['payment_plan']}' plan, which will expire on {$formattedExpiryDate}.";
+
+        if ($request->wantsJson())
+            return $this->api_response(
+                'Payment verified successfully. ' . $message,
+                ['data' => $result],
+                200
+            );
+
+        return redirect()->route('payment.success')->with([
+            'message' => $message,
+            'status' => 'success',
+            'title' => 'Payment successful!',
+        ]);
+    }
+
+    public function success()
+    {
+        return Inertia::render('Payment/Success', [
+            'message' => session('message'),
+            'status' => session('status'),
+            'title' => session('title'),
+        ]);
     }
 
     /**
@@ -138,5 +165,7 @@ class PaymentController extends Controller
             );
         });
     }
+
+
 }
 
