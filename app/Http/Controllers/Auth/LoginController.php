@@ -75,7 +75,7 @@ class LoginController extends Controller
 
             if (!$user) {
                 // Fetch student details from the OAuth endpoint
-                $studentDetails = $this->fetchStudentDetails($request->input('email'));
+                $studentDetails = $this->fetchStudentDetails($request->input('app'), $request->input('email'));
 
                 // Register the user locally
                 $validatedRes['name'] = trim(
@@ -99,10 +99,8 @@ class LoginController extends Controller
             }
 
             // Validate and associate the app with the user
-            $app = $request->input('app');
-            if (!$user->userApps()->where('app', $app)->exists()) {
-                $user->userApps()->create(['app' => $app]);
-            }
+            $app = $request->input('app') ?? null;
+            $user->addAppToUser($app);
 
             DB::commit(); // Commit the transaction
         } catch (\Exception $e) {
@@ -148,8 +146,9 @@ class LoginController extends Controller
     }
 
 
-    public function fetchStudentDetails(string $value, string $name = 'email')
+    public function fetchStudentDetails(string $app, string $value, string $name = 'email')
     {
+        $BASE_URL = SetupConstant::$oAuthBaseUrls[$app];
         $response = $response = Http::attach($name, $value)
             ->withHeaders([
                 'Accept' => '*/*',

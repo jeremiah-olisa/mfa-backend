@@ -5,11 +5,17 @@ namespace App\Http\Controllers\Auth;
 use App\Constants\SetupConstant;
 use App\Http\Controllers\Controller;
 use App\Repositories\UserRepository;
+use Exception;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Http\Request;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Foundation\Auth\RegistersUsers;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Validator;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Illuminate\Support\Facades\DB;
+use Symfony\Component\HttpKernel\Exception\HttpException;
+use Throwable;
 
 class RegisterController extends Controller
 {
@@ -33,6 +39,15 @@ class RegisterController extends Controller
      */
     protected $redirectTo = '/dashboard';
     protected UserRepository $userRepository;
+
+    private $API_ERRORS = [
+        '400' => 'Bad request. Please try again.',
+        '401' => 'Unauthorized. Please log in.',
+        '404' => 'Not found. Please check the URL.',
+        '500' => 'Internal server error. Please try again later.',
+        'NO_INTERNET' => 'No response from server. Please check your internet connection.',
+        '_' => 'An error occurred. Please try again.',
+    ];
 
     /**
      * Create a new controller instance.
@@ -59,6 +74,8 @@ class RegisterController extends Controller
             'password' => ['required', 'string', 'min:6', 'confirmed'],
             'app' => ['required', 'string', 'in:' . implode(',', SetupConstant::$apps)],
             'role' => ['required', 'string', 'in:' . implode(',', SetupConstant::$roles)],
+            'phone' => ['required', 'string', 'regex:/^(070|080|081|090|091)\d{8}$/'], // Match specific prefixes and 11 digits
+            'parent_phone' => ['nullable', 'string', 'regex:/^(070|080|081|090|091)\d{8}$/'], // Optional field with the same pattern
         ]);
     }
 
@@ -70,7 +87,20 @@ class RegisterController extends Controller
      */
     protected function create(array $data)
     {
-        return $this->userRepository->create($data);
+        $user = $this->userRepository->create($data);
+
+
+        $user->profile()->updateOrCreate([], [
+            'phone' => $data['phone'] ?? null,
+            'parent_phone' => $data['parent_phone'] ?? null,
+        ]);
+
+        $data["guardian"] = $data["parent_phone"] ?? null;
+        unset($data["parent_phone"]);
+
+        $this->registerOnOauthServer($data);
+
+        return $user;
     }
 
     public function register(Request $request)
@@ -79,41 +109,95 @@ class RegisterController extends Controller
 
         // Check if the user already exists
         $user = $this->userRepository->findByEmail($requestData['email']);
+        DB::beginTransaction();
 
-        if ($user) {
-            // User exists, check if they are registered for the app
-            $app = $requestData['app'] ?? null; // Ensure the app is in the request data
+        try {
+            if ($user) {
+                // User exists, check if they are registered for the app
+                $app = $requestData['app'] ?? null; // Ensure the app is in the request data
 
-            if ($app && !$user->userApps()->where('app', $app)->exists()) {
-                // Attach the app to the user
-                $user->userApps()->create(['app' => $app]);
+                if ($app && !$user->userApps()->where('app', $app)->exists()) {
+                    // Attach the app to the user
+                    $user->userApps()->create(['app' => $app]);
+                }
+
+                // Update UserProfile if phone or parent_phone is provided
+                if (!empty($requestData['phone']) || !empty($requestData['parent_phone'])) {
+                    $user->profile()->updateOrCreate([], [
+                        'phone' => $requestData['phone'] ?? null,
+                        'parent_phone' => $requestData['parent_phone'] ?? null,
+                    ]);
+                }
+
+                // Log in the existing user
+                $this->guard()->login($user);
+
+                return $request->wantsJson()
+                    ? new JsonResponse(['message' => 'User registered for the app and logged in.'], 200)
+                    : redirect($this->redirectPath());
             }
 
-            // Log in the existing user
-            $this->guard()->login($user);
+            // If user does not exist, proceed with the normal registration flow
+            event(new Registered($user = $this->create($requestData)));
 
-            return $request->wantsJson()
-                ? new JsonResponse(['message' => 'User registered for the app and logged in.'], 200)
-                : redirect($this->redirectPath());
+            // Attach the app to the newly registered user
+            $app = $requestData['app'] ?? null;
+            if ($app) {
+                $user->addAppToUser($app);
+            }
+            DB::commit(); // Commit the transaction
+        } catch (\Exception $e) {
+            DB::rollBack(); // Rollback on failure
+            throw $e; // Re-throw the exception for further handling/logging
         }
-
-        // If user does not exist, proceed with the normal registration flow
-        event(new Registered($user = $this->create($requestData)));
-
-        // Attach the app to the newly registered user
-        $app = $requestData['app'] ?? null;
-        if ($app) {
-            $user->userApps()->create(['app' => $app]);
-        }
-
         $this->guard()->login($user);
 
         if ($response = $this->registered($request, $user)) {
             return $response;
         }
 
+
         return $request->wantsJson()
             ? $this->api_response('Registration successful', null, 201) :
             redirect($this->redirectPath());
+    }
+
+    public function registerOnOauthServer(array $data)
+    {
+        $deviceId = 123456; // Logic to get device ID;
+        $formData = array_merge($data, ['deviceID' => $deviceId]);
+        $BASE_URL = SetupConstant::$oAuthBaseUrls[$data['app']];
+        try {
+            $response = Http::asMultipart()
+                ->withHeaders([
+                    'Accept' => '*/*',
+                    'Content-Type' => 'multipart/form-data',
+                ])
+                ->post($BASE_URL . '/register/validationMobile', $formData);
+
+            $responseData = $response->json();
+            return $this->handleValidationResponse($responseData);
+        } catch (Exception $exception) {
+            return $this->handleException($exception);
+        }
+    }
+
+    private function handleValidationResponse($responseData)
+    {
+        if ($responseData['message'] === 'Success' || $responseData['message'] == '0') {
+            return $responseData;
+        } else {
+            // Handle specific validation errors
+            throw new BadRequestHttpException($responseData['message']);
+        }
+    }
+
+    private function handleException(\Exception|Throwable|HttpException $exception)
+    {
+        $errorCode = $exception->getCode();
+        $message = isset($this->API_ERRORS[$errorCode]) ? $this->API_ERRORS[$errorCode] : $this->API_ERRORS['_'];
+        $statusCode = method_exists($exception, 'getStatusCode') ? $exception->getStatusCode() : 500;
+
+        return response()->json(['error' => $message], $statusCode);
     }
 }
