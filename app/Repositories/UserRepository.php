@@ -35,11 +35,18 @@ class UserRepository extends BaseRepository
 
     public function getUserProfileByUserId(int $userId): array
     {
-        $user = $this->findOneByOrThrow('id', $userId, ['profile']);
+        $user = $this->findOneByOrThrow('id', $userId, 'profile');
+
+        $fullName = $user?->name;
+
+        // Split name into first and last parts or set default values
+        [$firstName, $lastName] = $fullName
+            ? explode(' ', $fullName, 2) + [null, null]
+            : [null, null];
 
         return [
-            'firstname' => $user?->profile?->firstname ?? null,
-            'lastname' => $user?->profile?->lastname ?? null,
+            'firstname' => $firstName,
+            'lastname' => $lastName,
             'email' => $user?->email,
             'phone' => $user?->profile?->phone ?? null,
             'plan' => $user?->profile?->plan ?? null,
