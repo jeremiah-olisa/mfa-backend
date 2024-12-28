@@ -74,8 +74,8 @@ class UserService
     public function getCurrentUserProfile()
     {
         $userId = Auth::id();
-
-        return $this->userRepository->getUserProfileByUserId($userId);
+        $app = request()->header('MFA_ORGANIZATION');
+        return $this->userRepository->getUserProfileByUserId($userId, $app);
 
     }
 

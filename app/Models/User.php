@@ -55,12 +55,18 @@ class User extends Authenticatable
         return $this->hasMany(UserApp::class);
     }
 
+    public function userAppsByApp(string $app)
+    {
+        return $this->userApps()->where('app', $app)->get();
+    }
+
     public function addAppToUser($app)
     {
         if ($app && !$this->userApps()->where('app', $app)->exists()) {
             $this->userApps()->create(['app' => $app]);
         }
     }
+
     public function profile()
     {
         return $this->hasOne(UserProfile::class);

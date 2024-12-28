@@ -27,10 +27,12 @@ class PaymentController extends Controller
      * @param int $plan_id
      * @return \Illuminate\Http\JsonResponse
      */
-    public function getPaymentLinkByPlanId(int $plan_id)
+    public function getPaymentLinkByPlanId(int $plan_id, Request $request)
     {
-        return $this->handleErrors(function () use ($plan_id) {
-            $response = $this->paymentService->getPaymentLinkByPlanId($plan_id);
+        $app = $request->header("MFA_ORGANIZATION");
+
+        return $this->handleErrors(function () use ($plan_id, $app) {
+            $response = $this->paymentService->getPaymentLinkByPlanId($plan_id, $app);
             return $this->api_response(
                 'Payment link generated successfully.',
                 $response,

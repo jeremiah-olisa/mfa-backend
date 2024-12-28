@@ -5,6 +5,7 @@ namespace App\Services;
 
 use App\Repositories\PaymentPlanRepository;
 use App\Repositories\PaymentRepository;
+use App\Repositories\UserAppRepository;
 use App\Repositories\UserProfileRepository;
 use App\Repositories\UserRepository;
 use GuzzleHttp\Exception\ClientException;
@@ -24,21 +25,23 @@ class PaymentService extends Paystack
     protected PaymentPlanRepository $paymentPlanRepository;
     protected UserRepository $userRepository;
     protected UserProfileRepository $userProfileRepository;
+    protected UserAppRepository $userAppRepository;
 
 //    protected Paystack $paystackService;
 
-    public function __construct(PaymentRepository $paymentRepository, PaymentPlanRepository $paymentPlanRepository, UserRepository $userRepository, UserProfileRepository $userProfileRepository)
+    public function __construct(PaymentRepository $paymentRepository, PaymentPlanRepository $paymentPlanRepository, UserRepository $userRepository, UserProfileRepository $userProfileRepository, UserAppRepository $userAppRepository)
     {
         $this->paymentRepository = $paymentRepository;
         $this->paymentPlanRepository = $paymentPlanRepository;
         $this->userRepository = $userRepository;
 //        $this->paystackService = $paystackService;
         $this->userProfileRepository = $userProfileRepository;
+        $this->userAppRepository = $userAppRepository;
         parent::__construct();
     }
 
     // pay/{plan_id}
-    public function getPaymentLinkByPlanId(int $plan_id)
+    public function getPaymentLinkByPlanId(int $plan_id, string $app)
     {
         $amount = $this->paymentPlanRepository->getPlanAmountByPlanId($plan_id) * 100; // convert to kobo
         $user_id = Auth::id() ?? throw new UnauthorizedHttpException("", "You don't have authorization to access this page");
@@ -52,7 +55,8 @@ class PaymentService extends Paystack
             'reference' => $reference,
             'callback_url' => route('verifyPayment', ['reference' => $reference]),
             "metadata" => [
-                "cancel_action" => "https://standard.paystack.co/close"
+                "cancel_action" => "https://standard.paystack.co/close",
+                "MFA_ORGANIZATION" => $app
             ]
         ];
         $paystack = $this->getAuthorizationUrl($paystackData);
@@ -89,6 +93,8 @@ class PaymentService extends Paystack
         if (!$paymentDetails || !$paymentDetails['status'])
             throw ValidationException::withMessages(["paystack" => "Payment verification failed for reference: {$reference}."]);
 
+        $app = $paymentDetails['data']['metadata']['MFA_ORGANIZATION'];
+
         DB::beginTransaction();
         try {
             // Retrieve the payment record
@@ -97,7 +103,7 @@ class PaymentService extends Paystack
             $duration = $this->paymentPlanRepository->getPlanDurationByPlanId($payment->payment_plan_id);
             $payment_plan = $this->paymentPlanRepository->getPlanNameByPlanId($payment->payment_plan_id);
 
-            $expires_at = $this->userProfileRepository->updateExpiry($payment->user_id, $duration, $payment_plan);
+            $expires_at = $this->userAppRepository->updateExpiry($payment->user_id, $duration, $payment_plan, $app);
 
             DB::commit();
 

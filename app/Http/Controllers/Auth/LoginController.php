@@ -186,14 +186,17 @@ class LoginController extends Controller
         // Generate a token
         $token = $user->createToken($user->name . 'API Token')->plainTextToken;
 
+        $app = $request->header('MFA_ORGANIZATION');
+        $userApp = $user->userAppsByApp($app);
+
         $responseData = [
             'firstname' => $firstname,
             'lastname' => $lastname,
             'email' => $user->email,
             'phone' => $user->profile->phone ?? null,
-            'plan' => $user->profile->plan ?? null,
-            'plan_duration' => $user->profile->plan_duration ?? null,
-            'plan_expires_at' => $user->profile->plan_expires_at ?? null,
+            'plan' => $userApp["plan"] ?? null,
+            'plan_duration' => $userApp["plan_duration"] ?? null,
+            'plan_expires_at' => $userApp["plan_expires_at"] ?? null,
             'student_status' => $user->student_status ?? '1', // Default to '1' if not set
             'last_login' => $user->last_login ?? now()->toDateTimeString(),
             'deviceID' => $user->device_id ?? null,
