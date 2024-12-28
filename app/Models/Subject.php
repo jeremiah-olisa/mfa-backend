@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Subject extends Model
 {
     use HasFactory;
+
     protected $fillable = ['name', 'label', 'icon_url'];
 
     public function questions()
@@ -15,7 +16,14 @@ class Subject extends Model
         return $this->hasMany(Question::class);
     }
 
-     /**
+    public function examQuestionsCount(string $exam)
+    {
+        return $this->hasMany(Question::class)
+            ->where('test_type', $exam)
+            ->count();
+    }
+
+    /**
      * Relationship with ExamSubjectSyllabus model.
      */
     public function syllabi()

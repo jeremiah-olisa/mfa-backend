@@ -12,6 +12,8 @@ enum Subjects
     const English = "English";
     const Agric = "Agric";
     const Economics = "Economics";
+    const FurtherMaths = "Further Maths";
+    const History = "History";
     const Geography = "Geography";
     const Literature = "Englishlit";
     const Marketing = "Marketing";

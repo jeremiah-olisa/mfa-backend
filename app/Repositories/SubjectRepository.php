@@ -15,4 +15,13 @@ class SubjectRepository extends BaseRepository
     {
         parent::__construct($subject);
     }
+
+    public function getSubjectsWithMultipleQuestionsForExam(string $exam): \Illuminate\Database\Eloquent\Collection
+    {
+        return $this->model->newQuery()->whereHas('questions', function ($query) use ($exam) {
+            $query->where('test_type', $exam)
+                ->groupBy('subject_id')
+                ->havingRaw('COUNT(*) > 1');
+        })->withCount('questions')->get();
+    }
 }

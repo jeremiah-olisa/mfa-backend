@@ -40,7 +40,7 @@ class PaymentPlanSeeder extends Seeder
         ];
 
         foreach ($paymentPlans as $plan) {
-            PaymentPlan::create($plan);
+            PaymentPlan::query()->upsert($plan, ['name']);
         }
     }
 }

@@ -3,7 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PaymentController;
 
-Route::middleware(['api'])->group(function () {
+Route::middleware(['api', \App\Http\Middleware\ValidateMfaOrganizationHeader::class])->group(function () {
     Route::prefix('payments')->group(function () {
         Route::get('verify/{reference}', [PaymentController::class, 'verifyPayment'])->name('verifyPaymentAPI');
         Route::get('plans', [PaymentController::class, 'getAllPaymentPlans']);

@@ -5,8 +5,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
@@ -15,8 +14,8 @@ return new class extends Migration
         Schema::create('exam_subject_syllabi', function (Blueprint $table) {
             $table->id();
             $table->enum('exam', SetupConstant::$exams); // Enum for exam
-            $table->foreignId('subject_id')->constrained()->onDelete('cascade'); // Link to subject table
-            $table->string('syllabus_link'); // Syllabus link as a string
+            $table->foreignId('subject_id')->constrained('subjects')->onDelete('cascade');
+            $table->string('syllabus_link', 255); // Syllabus link as a string
             $table->timestamps();
         });
     }
