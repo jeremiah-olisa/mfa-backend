@@ -4,7 +4,7 @@
 		"name": "MFA Backend Api",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "14083019",
-		"_collection_link": "https://web.postman.co/workspace/codefactory~7150528e-175f-4db0-9d21-094d62d0f954/collection/14083019-0337d5b0-f3ed-4f82-b681-2a8949d055dd?action=share&source=collection_link&creator=14083019"
+		"_collection_link": "https://smsrep.postman.co/workspace/codefactory~7150528e-175f-4db0-9d21-094d62d0f954/collection/14083019-0337d5b0-f3ed-4f82-b681-2a8949d055dd?action=share&source=collection_link&creator=14083019"
 	},
 	"item": [
 		{
@@ -31,7 +31,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"name\": \"Jay Maildrop\",\r\n    \"email\": \"jeremiaholisa6@maildrop.cc\",\r\n    \"password\": \"jeremiaholisa@maildrop.cc\",\r\n    \"password_confirmation\": \"jeremiaholisa@maildrop.cc\",\r\n    \"app\": \"ADMIN\",\r\n    \"role\": \"Admin\"\r\n}",
+							"raw": "{\r\n    \"name\": \"Jay Maildrop\",\r\n    \"email\": \"mfa2@maildrop.cc\",\r\n    \"password\": \"foryou\",\r\n    \"password_confirmation\": \"foryou\",\r\n    \"app\": \"ADMIN\",\r\n    \"role\": \"Student\",\r\n    \"phone\": \"08128934933\",\r\n    \"parent_phone\": \"08128448933\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -214,11 +214,16 @@
 								"key": "Content-Type",
 								"value": "application/json",
 								"type": "text"
+							},
+							{
+								"key": "MFA_ORGANIZATION",
+								"value": "{{MFA_ORGANIZATION}}",
+								"type": "text"
 							}
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"email\": \"jeremiaholisa2@maildrop.cc\",\r\n    \"password\": \"jeremiaholisa@maildrop.cc\",\r\n    \"app\": \"ADMIN\"\r\n}",
+							"raw": "{\r\n    \"email\": \"mfa@maildrop.cc\",\r\n    \"password\": \"foryou\",\r\n    \"app\": \"WAEC\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -461,6 +466,178 @@
 					]
 				},
 				{
+					"name": "Forgot Password",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "MFA_ORGANIZATION",
+								"value": "{{MFA_ORGANIZATION}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"mfa@maildrop.cc\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/auth/forgot-password",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"auth",
+								"forgot-password"
+							]
+						},
+						"description": "### Auth Login\n\nThis endpoint allows users to log in and obtain an authentication token.\n\n#### Request Body\n\n- email (string): The email address of the user.\n    \n- password (string): The password of the user.\n    \n- app (string): The application identifier.\n    \n\n#### Response\n\nThe response is a JSON object with the following schema:\n\n``` json\n{\n    \"status\": \"\",\n    \"message\": \"\",\n    \"data\": {\n        \"firstname\": \"\",\n        \"lastname\": \"\",\n        \"phone\": null,\n        \"plan\": null,\n        \"plan_duration\": null,\n        \"student_status\": \"\",\n        \"last_login\": \"\",\n        \"deviceID\": null,\n        \"parent_email\": null,\n        \"parent_phone\": null,\n        \"token\": \"\"\n    }\n}\n\n ```"
+					},
+					"response": []
+				},
+				{
+					"name": "Get User Profile",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "MFA_ORGANIZATION",
+								"value": "{{MFA_ORGANIZATION}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"jeremiaholisa2@maildrop.cc\",\r\n    \"password\": \"jeremiaholisa@maildrop.cc\",\r\n    \"app\": \"ADMIN\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/auth/user",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"auth",
+								"user"
+							]
+						},
+						"description": "### Auth Login\n\nThis endpoint allows users to log in and obtain an authentication token.\n\n#### Request Body\n\n- email (string): The email address of the user.\n    \n- password (string): The password of the user.\n    \n- app (string): The application identifier.\n    \n\n#### Response\n\nThe response is a JSON object with the following schema:\n\n``` json\n{\n    \"status\": \"\",\n    \"message\": \"\",\n    \"data\": {\n        \"firstname\": \"\",\n        \"lastname\": \"\",\n        \"phone\": null,\n        \"plan\": null,\n        \"plan_duration\": null,\n        \"student_status\": \"\",\n        \"last_login\": \"\",\n        \"deviceID\": null,\n        \"parent_email\": null,\n        \"parent_phone\": null,\n        \"token\": \"\"\n    }\n}\n\n ```"
+					},
+					"response": [
+						{
+							"name": "200",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "MFA_ORGANIZATION",
+										"value": "{{MFA_ORGANIZATION}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"email\": \"jeremiaholisa2@maildrop.cc\",\r\n    \"password\": \"jeremiaholisa@maildrop.cc\",\r\n    \"app\": \"ADMIN\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{BASE_URL}}/auth/user",
+									"host": [
+										"{{BASE_URL}}"
+									],
+									"path": [
+										"auth",
+										"user"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Host",
+									"value": "localhost:8000"
+								},
+								{
+									"key": "Connection",
+									"value": "close"
+								},
+								{
+									"key": "X-Powered-By",
+									"value": "PHP/8.2.12"
+								},
+								{
+									"key": "Cache-Control",
+									"value": "no-cache, private"
+								},
+								{
+									"key": "Date",
+									"value": "Sat, 28 Dec 2024 16:24:54 GMT"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								},
+								{
+									"key": "Access-Control-Allow-Origin",
+									"value": "*"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"200 OK\",\n    \"message\": \"Profile retrieved successfully\",\n    \"data\": {\n        \"firstname\": \"Jeremiah\",\n        \"lastname\": \"Olisa\",\n        \"email\": \"mfa@maildrop.cc\",\n        \"phone\": \"07012336694\",\n        \"plan\": null,\n        \"plan_duration\": null,\n        \"plan_expires_at\": null,\n        \"student_status\": \"1\",\n        \"last_login\": \"2024-12-28 16:24:54\",\n        \"deviceID\": null,\n        \"parent_email\": null,\n        \"parent_phone\": \"08085466464\"\n    }\n}"
+						}
+					]
+				},
+				{
 					"name": "Logout",
 					"request": {
 						"method": "DELETE",
@@ -577,7 +754,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"first_name\": \"John\",\r\n    \"last_name\": \"Doe\",\r\n    \"email\": \"johndoe@maildrop.cc\",\r\n    \"phone\": \"+1234567890\",\r\n    \"parent_email\": \"parent@example.com\",\r\n    \"parent_phone\": \"+9876543210\"\r\n}",
+							"raw": "{\r\n    \"first_name\": \"John\",\r\n    \"last_name\": \"Doe\",\r\n    \"email\": \"mfa@maildrop.cc\",\r\n    \"phone\": \"+1234567890\",\r\n    \"parent_email\": \"parent@example.com\",\r\n    \"parent_phone\": \"+9876543210\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -687,7 +864,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\r\n    \"first_name\": \"John\",\r\n    \"last_name\": \"Doe\",\r\n    \"email\": \"johndoe@maildrop.cc\",\r\n    \"phone\": \"+1234567890\",\r\n    \"parent_email\": \"parent@example.com\",\r\n    \"parent_phone\": \"+9876543210\"\r\n}",
+									"raw": "{\r\n    \"first_name\": \"John\",\r\n    \"last_name\": \"Doe\",\r\n    \"email\": \"johndoe@maildrop.cc\",\r\n    \"phone\": \"+1234567890\",\r\n    \"parent_email\": \"parent@example.com\",\r\n    \"parent_phone\": \"+9876543210\"\r\n}       ",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -746,10 +923,13 @@
 			]
 		},
 		{
-			"name": "Questions",
+			"name": "Subject & Syllabus",
 			"item": [
 				{
-					"name": "Get All Questions",
+					"name": "Get Syllabus",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
 					"request": {
 						"method": "GET",
 						"header": [
@@ -762,23 +942,39 @@
 								"key": "Content-Type",
 								"value": "application/json",
 								"type": "text"
+							},
+							{
+								"key": "MFA_ORGANIZATION",
+								"value": "{{MFA_ORGANIZATION}}",
+								"type": "text"
 							}
 						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"first_name\": \"John2\",\r\n    \"last_name\": \"Doe\",\r\n    \"email\": \"mfa@maildrop.cc\",\r\n    \"phone\": \"+1234567890\",\r\n    \"parent_email\": \"parent@example.com\",\r\n    \"parent_phone\": \"+9876543210\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
 						"url": {
-							"raw": "{{BASE_URL}}/questions",
+							"raw": "{{BASE_URL}}/syllabus/",
 							"host": [
 								"{{BASE_URL}}"
 							],
 							"path": [
-								"questions"
+								"syllabus",
+								""
 							]
-						}
+						},
+						"description": "### Update User Information\n\nThis endpoint is used to update the user information such as first name, last name, email, phone, parent's email, and parent's phone.\n\n#### Request Body\n\n- Type: JSON\n    \n    - `first_name`: (string) The first name of the user.\n        \n    - `last_name`: (string) The last name of the user.\n        \n    - `email`: (string) The email address of the user.\n        \n    - `phone`: (string) The phone number of the user.\n        \n    - `parent_email`: (string) The email address of the user's parent.\n        \n    - `parent_phone`: (string) The phone number of the user's parent.\n        \n\nExample request body:\n\n``` json\n{\n    \"first_name\": \"John\",\n    \"last_name\": \"Doe\",\n    \"email\": \"johndoe@maildrop.cc\",\n    \"phone\": \"+1234567890\",\n    \"parent_email\": \"parent@example.com\",\n    \"parent_phone\": \"+9876543210\"\n}\n\n ```\n\n#### Response\n\n- Status: 200\n    \n- Content-Type: application/json\n    \n\nExample response body (JSON schema):\n\n``` json\n{\n    \"type\": \"object\",\n    \"properties\": {\n        \"status\": {\n            \"type\": \"string\"\n        },\n        \"message\": {\n            \"type\": \"string\"\n        },\n        \"data\": {\n            \"type\": \"object\",\n            \"properties\": {\n                \"id\": {\n                    \"type\": \"integer\"\n                },\n                \"name\": {\n                    \"type\": \"string\"\n                },\n                \"email\": {\n                    \"type\": \"string\"\n                },\n                \"email_verified_at\": {\n                    \"type\": [\"string\", \"null\"]\n                },\n                \"created_at\": {\n                    \"type\": \"string\"\n                },\n                \"updated_at\": {\n                    \"type\": \"string\"\n                },\n                \"role\": {\n                    \"type\": \"string\"\n                },\n                \"profile\": {\n                    \"type\": \"object\",\n                    \"properties\": {\n                        \"user_id\": {\n                            \"type\": \"integer\"\n                        },\n                        \"phone\": {\n                            \"type\": \"string\"\n                        },\n                        \"parent_email\": {\n                            \"type\": \"string\"\n                        },\n                        \"parent_phone\": {\n                            \"type\": \"string\"\n                        }\n                    }\n                }\n            }\n        }\n    }\n}\n\n ```"
 					},
 					"response": [
 						{
-							"name": "422",
+							"name": "200",
 							"originalRequest": {
-								"method": "PATCH",
+								"method": "GET",
 								"header": [
 									{
 										"key": "Accept",
@@ -789,11 +985,16 @@
 										"key": "Content-Type",
 										"value": "application/json",
 										"type": "text"
+									},
+									{
+										"key": "MFA_ORGANIZATION",
+										"value": "{{MFA_ORGANIZATION}}",
+										"type": "text"
 									}
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\r\n    \"first_name\": \"John\",\r\n    \"last_name\": \"Doe\",\r\n    \"email\": \"johndoe@example.com\",\r\n    \"phone\": \"+1234567890\",\r\n    \"parent_email\": \"parent@example.com\",\r\n    \"parent_phone\": \"+9876543210\"\r\n}",
+									"raw": "{\r\n    \"first_name\": \"John2\",\r\n    \"last_name\": \"Doe\",\r\n    \"email\": \"mfa@maildrop.cc\",\r\n    \"phone\": \"+1234567890\",\r\n    \"parent_email\": \"parent@example.com\",\r\n    \"parent_phone\": \"+9876543210\"\r\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -801,56 +1002,120 @@
 									}
 								},
 								"url": {
-									"raw": "{{BASE_URL}}/auth/user",
+									"raw": "{{BASE_URL}}/syllabus/",
 									"host": [
 										"{{BASE_URL}}"
 									],
 									"path": [
-										"auth",
-										"user"
+										"syllabus",
+										""
 									]
 								}
 							},
-							"status": "Unprocessable Content",
-							"code": 422,
+							"status": "OK",
+							"code": 200,
 							"_postman_previewlanguage": "json",
 							"header": [
 								{
-									"key": "Host",
-									"value": "localhost:8000"
+									"key": "Date",
+									"value": "Mon, 30 Dec 2024 11:13:09 GMT"
 								},
 								{
-									"key": "Connection",
-									"value": "close"
+									"key": "Server",
+									"value": "Apache"
 								},
 								{
 									"key": "X-Powered-By",
-									"value": "PHP/8.2.12"
+									"value": "PHP/8.2.26"
 								},
 								{
 									"key": "Cache-Control",
 									"value": "no-cache, private"
 								},
 								{
-									"key": "Date",
-									"value": "Sat, 07 Dec 2024 15:34:40 GMT"
+									"key": "Access-Control-Allow-Origin",
+									"value": "*"
+								},
+								{
+									"key": "Vary",
+									"value": "Authorization,Accept-Encoding"
+								},
+								{
+									"key": "Content-Encoding",
+									"value": "br"
+								},
+								{
+									"key": "Content-Length",
+									"value": "515"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								},
+								{
+									"key": "Connection",
+									"value": "Keep-Alive"
 								},
 								{
 									"key": "Content-Type",
 									"value": "application/json"
-								},
-								{
-									"key": "Access-Control-Allow-Origin",
-									"value": "*"
 								}
 							],
 							"cookie": [],
-							"body": "{\n    \"message\": \"The email has already been taken.\",\n    \"errors\": {\n        \"email\": [\n            \"The email has already been taken.\"\n        ]\n    }\n}"
+							"body": "{\n    \"status\": \"200 OK\",\n    \"message\": \"Syllabi retrieved successfully\",\n    \"syllabi\": [\n        {\n            \"id\": 1,\n            \"exam\": \"WAEC\",\n            \"subject_id\": 15,\n            \"syllabus_link\": \"http://admin.myfirstattempt.com/syllabus/waec/waec_wassce_agricultural_science_syllabus.pdf\",\n            \"created_at\": \"2024-12-30T09:01:36.000000Z\",\n            \"updated_at\": \"2024-12-30T09:01:36.000000Z\",\n            \"subject\": {\n                \"id\": 15,\n                \"name\": \"Agric\",\n                \"label\": \"Agric\"\n            }\n        },\n        {\n            \"id\": 2,\n            \"exam\": \"WAEC\",\n            \"subject_id\": 2,\n            \"syllabus_link\": \"http://admin.myfirstattempt.com/syllabus/waec/waec_wassce_biology_syllabus.pdf\",\n            \"created_at\": \"2024-12-30T09:01:36.000000Z\",\n            \"updated_at\": \"2024-12-30T09:01:36.000000Z\",\n            \"subject\": {\n                \"id\": 2,\n                \"name\": \"Biology\",\n                \"label\": \"Biology\"\n            }\n        },\n        {\n            \"id\": 3,\n            \"exam\": \"WAEC\",\n            \"subject_id\": 3,\n            \"syllabus_link\": \"http://admin.myfirstattempt.com/syllabus/waec/waec_wassce_chemistry_syllabus.pdf\",\n            \"created_at\": \"2024-12-30T09:01:36.000000Z\",\n            \"updated_at\": \"2024-12-30T09:01:36.000000Z\",\n            \"subject\": {\n                \"id\": 3,\n                \"name\": \"Chemistry\",\n                \"label\": \"Chemistry\"\n            }\n        },\n        {\n            \"id\": 4,\n            \"exam\": \"WAEC\",\n            \"subject_id\": 6,\n            \"syllabus_link\": \"http://admin.myfirstattempt.com/syllabus/waec/waec_wassce_christian_religious_studies_syllabus.pdf\",\n            \"created_at\": \"2024-12-30T09:01:36.000000Z\",\n            \"updated_at\": \"2024-12-30T09:01:36.000000Z\",\n            \"subject\": {\n                \"id\": 6,\n                \"name\": \"CRS\",\n                \"label\": \"CRS\"\n            }\n        },\n        {\n            \"id\": 5,\n            \"exam\": \"WAEC\",\n            \"subject_id\": 4,\n            \"syllabus_link\": \"http://admin.myfirstattempt.com/syllabus/waec/waec_wassce_civic_education_syllabus.pdf\",\n            \"created_at\": \"2024-12-30T09:01:36.000000Z\",\n            \"updated_at\": \"2024-12-30T09:01:36.000000Z\",\n            \"subject\": {\n                \"id\": 4,\n                \"name\": \"Civiledu\",\n                \"label\": \"Civiledu\"\n            }\n        },\n        {\n            \"id\": 6,\n            \"exam\": \"WAEC\",\n            \"subject_id\": 5,\n            \"syllabus_link\": \"http://admin.myfirstattempt.com/syllabus/waec/waec_wassce_commerce_syllabus.pdf\",\n            \"created_at\": \"2024-12-30T09:01:36.000000Z\",\n            \"updated_at\": \"2024-12-30T09:01:36.000000Z\",\n            \"subject\": {\n                \"id\": 5,\n                \"name\": \"Commerce\",\n                \"label\": \"Commerce\"\n            }\n        },\n        {\n            \"id\": 7,\n            \"exam\": \"WAEC\",\n            \"subject_id\": 21,\n            \"syllabus_link\": \"http://admin.myfirstattempt.com/syllabus/waec/waec_wassce_computer_studies_syllabus.pdf\",\n            \"created_at\": \"2024-12-30T09:01:36.000000Z\",\n            \"updated_at\": \"2024-12-30T09:01:36.000000Z\",\n            \"subject\": {\n                \"id\": 21,\n                \"name\": \"Computer\",\n                \"label\": \"Computer\"\n            }\n        },\n        {\n            \"id\": 8,\n            \"exam\": \"WAEC\",\n            \"subject_id\": 8,\n            \"syllabus_link\": \"http://admin.myfirstattempt.com/syllabus/waec/waec_wassce_english_language_syllabus.pdf\",\n            \"created_at\": \"2024-12-30T09:01:36.000000Z\",\n            \"updated_at\": \"2024-12-30T09:01:36.000000Z\",\n            \"subject\": {\n                \"id\": 8,\n                \"name\": \"English\",\n                \"label\": \"English\"\n            }\n        },\n        {\n            \"id\": 9,\n            \"exam\": \"WAEC\",\n            \"subject_id\": 31,\n            \"syllabus_link\": \"http://admin.myfirstattempt.com/syllabus/waec/waec_wassce_further_mathematics_syllabus.pdf\",\n            \"created_at\": \"2024-12-30T09:01:36.000000Z\",\n            \"updated_at\": \"2024-12-30T09:01:36.000000Z\",\n            \"subject\": {\n                \"id\": 31,\n                \"name\": \"Further Maths\",\n                \"label\": \"Further Maths\"\n            }\n        },\n        {\n            \"id\": 10,\n            \"exam\": \"WAEC\",\n            \"subject_id\": 11,\n            \"syllabus_link\": \"http://admin.myfirstattempt.com/syllabus/waec/waec_wassce_government_syllabus.pdf\",\n            \"created_at\": \"2024-12-30T09:01:36.000000Z\",\n            \"updated_at\": \"2024-12-30T09:01:36.000000Z\",\n            \"subject\": {\n                \"id\": 11,\n                \"name\": \"Government\",\n                \"label\": \"Government\"\n            }\n        },\n        {\n            \"id\": 11,\n            \"exam\": \"WAEC\",\n            \"subject_id\": 32,\n            \"syllabus_link\": \"http://admin.myfirstattempt.com/syllabus/waec/waec_wassce_history_syllabus.pdf\",\n            \"created_at\": \"2024-12-30T09:01:36.000000Z\",\n            \"updated_at\": \"2024-12-30T09:01:36.000000Z\",\n            \"subject\": {\n                \"id\": 32,\n                \"name\": \"History\",\n                \"label\": \"History\"\n            }\n        },\n        {\n            \"id\": 12,\n            \"exam\": \"WAEC\",\n            \"subject_id\": 13,\n            \"syllabus_link\": \"http://admin.myfirstattempt.com/syllabus/waec/waec_wassce_mathematics_syllabus.pdf\",\n            \"created_at\": \"2024-12-30T09:01:36.000000Z\",\n            \"updated_at\": \"2024-12-30T09:01:36.000000Z\",\n            \"subject\": {\n                \"id\": 13,\n                \"name\": \"Mathematics\",\n                \"label\": \"Maths\"\n            }\n        },\n        {\n            \"id\": 13,\n            \"exam\": \"WAEC\",\n            \"subject_id\": 14,\n            \"syllabus_link\": \"http://admin.myfirstattempt.com/syllabus/waec/waec_wassce_physics_syllabus.pdf\",\n            \"created_at\": \"2024-12-30T09:01:36.000000Z\",\n            \"updated_at\": \"2024-12-30T09:01:36.000000Z\",\n            \"subject\": {\n                \"id\": 14,\n                \"name\": \"Physics\",\n                \"label\": \"Physics\"\n            }\n        }\n    ]\n}"
+						}
+					]
+				},
+				{
+					"name": "Get Subjects",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "MFA_ORGANIZATION",
+								"value": "{{MFA_ORGANIZATION}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"first_name\": \"John2\",\r\n    \"last_name\": \"Doe\",\r\n    \"email\": \"mfa@maildrop.cc\",\r\n    \"phone\": \"+1234567890\",\r\n    \"parent_email\": \"parent@example.com\",\r\n    \"parent_phone\": \"+9876543210\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
 						},
+						"url": {
+							"raw": "{{BASE_URL}}/subjects/",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"subjects",
+								""
+							]
+						},
+						"description": "### Update User Information\n\nThis endpoint is used to update the user information such as first name, last name, email, phone, parent's email, and parent's phone.\n\n#### Request Body\n\n- Type: JSON\n    \n    - `first_name`: (string) The first name of the user.\n        \n    - `last_name`: (string) The last name of the user.\n        \n    - `email`: (string) The email address of the user.\n        \n    - `phone`: (string) The phone number of the user.\n        \n    - `parent_email`: (string) The email address of the user's parent.\n        \n    - `parent_phone`: (string) The phone number of the user's parent.\n        \n\nExample request body:\n\n``` json\n{\n    \"first_name\": \"John\",\n    \"last_name\": \"Doe\",\n    \"email\": \"johndoe@maildrop.cc\",\n    \"phone\": \"+1234567890\",\n    \"parent_email\": \"parent@example.com\",\n    \"parent_phone\": \"+9876543210\"\n}\n\n ```\n\n#### Response\n\n- Status: 200\n    \n- Content-Type: application/json\n    \n\nExample response body (JSON schema):\n\n``` json\n{\n    \"type\": \"object\",\n    \"properties\": {\n        \"status\": {\n            \"type\": \"string\"\n        },\n        \"message\": {\n            \"type\": \"string\"\n        },\n        \"data\": {\n            \"type\": \"object\",\n            \"properties\": {\n                \"id\": {\n                    \"type\": \"integer\"\n                },\n                \"name\": {\n                    \"type\": \"string\"\n                },\n                \"email\": {\n                    \"type\": \"string\"\n                },\n                \"email_verified_at\": {\n                    \"type\": [\"string\", \"null\"]\n                },\n                \"created_at\": {\n                    \"type\": \"string\"\n                },\n                \"updated_at\": {\n                    \"type\": \"string\"\n                },\n                \"role\": {\n                    \"type\": \"string\"\n                },\n                \"profile\": {\n                    \"type\": \"object\",\n                    \"properties\": {\n                        \"user_id\": {\n                            \"type\": \"integer\"\n                        },\n                        \"phone\": {\n                            \"type\": \"string\"\n                        },\n                        \"parent_email\": {\n                            \"type\": \"string\"\n                        },\n                        \"parent_phone\": {\n                            \"type\": \"string\"\n                        }\n                    }\n                }\n            }\n        }\n    }\n}\n\n ```"
+					},
+					"response": [
 						{
 							"name": "200",
 							"originalRequest": {
-								"method": "PATCH",
+								"method": "GET",
 								"header": [
 									{
 										"key": "Accept",
@@ -861,11 +1126,16 @@
 										"key": "Content-Type",
 										"value": "application/json",
 										"type": "text"
+									},
+									{
+										"key": "MFA_ORGANIZATION",
+										"value": "{{MFA_ORGANIZATION}}",
+										"type": "text"
 									}
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\r\n    \"first_name\": \"John\",\r\n    \"last_name\": \"Doe\",\r\n    \"email\": \"johndoe@maildrop.cc\",\r\n    \"phone\": \"+1234567890\",\r\n    \"parent_email\": \"parent@example.com\",\r\n    \"parent_phone\": \"+9876543210\"\r\n}",
+									"raw": "{\r\n    \"first_name\": \"John2\",\r\n    \"last_name\": \"Doe\",\r\n    \"email\": \"mfa@maildrop.cc\",\r\n    \"phone\": \"+1234567890\",\r\n    \"parent_email\": \"parent@example.com\",\r\n    \"parent_phone\": \"+9876543210\"\r\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -873,13 +1143,13 @@
 									}
 								},
 								"url": {
-									"raw": "{{BASE_URL}}/auth/user",
+									"raw": "{{BASE_URL}}/subjects/",
 									"host": [
 										"{{BASE_URL}}"
 									],
 									"path": [
-										"auth",
-										"user"
+										"subjects",
+										""
 									]
 								}
 							},
@@ -905,7 +1175,7 @@
 								},
 								{
 									"key": "Date",
-									"value": "Sat, 07 Dec 2024 15:47:30 GMT"
+									"value": "Sat, 28 Dec 2024 15:09:44 GMT"
 								},
 								{
 									"key": "Content-Type",
@@ -917,9 +1187,47 @@
 								}
 							],
 							"cookie": [],
-							"body": "{\n    \"status\": \"200 OK\",\n    \"message\": \"User profile updated successfully.\",\n    \"data\": {\n        \"id\": 4,\n        \"name\": \"John Doe\",\n        \"email\": \"johndoe@maildrop.cc\",\n        \"email_verified_at\": null,\n        \"created_at\": \"2024-12-07T11:57:53.000000Z\",\n        \"updated_at\": \"2024-12-07T15:44:05.000000Z\",\n        \"role\": \"Admin\",\n        \"profile\": {\n            \"user_id\": 4,\n            \"phone\": \"+1234567890\",\n            \"parent_email\": \"parent@example.com\",\n            \"parent_phone\": \"+9876543210\"\n        }\n    }\n}"
+							"body": "{\n    \"status\": \"200 OK\",\n    \"message\": \"Subjects retrieved successfully\",\n    \"data\": [\n        {\n            \"id\": 5,\n            \"name\": \"Commerce\",\n            \"label\": \"Commerce\",\n            \"created_at\": \"2024-12-02T15:17:55.000000Z\",\n            \"updated_at\": \"2024-12-28T15:04:11.000000Z\",\n            \"icon_url\": \"http://localhost:8000/subjects/Commerce.png\",\n            \"questions_count\": 809\n        }\n    ]\n}"
 						}
 					]
+				}
+			]
+		},
+		{
+			"name": "Questions",
+			"item": [
+				{
+					"name": "Get All Questions",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "MFA_ORGANIZATION",
+								"value": "{{MFA_ORGANIZATION}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{BASE_URL}}/questions",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"questions"
+							]
+						}
+					},
+					"response": []
 				},
 				{
 					"name": "Get Questions By Test Type",
@@ -949,150 +1257,6 @@
 						}
 					},
 					"response": [
-						{
-							"name": "422",
-							"originalRequest": {
-								"method": "PATCH",
-								"header": [
-									{
-										"key": "Accept",
-										"value": "application/json",
-										"type": "text"
-									},
-									{
-										"key": "Content-Type",
-										"value": "application/json",
-										"type": "text"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\r\n    \"first_name\": \"John\",\r\n    \"last_name\": \"Doe\",\r\n    \"email\": \"johndoe@example.com\",\r\n    \"phone\": \"+1234567890\",\r\n    \"parent_email\": \"parent@example.com\",\r\n    \"parent_phone\": \"+9876543210\"\r\n}",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": {
-									"raw": "{{BASE_URL}}/auth/user",
-									"host": [
-										"{{BASE_URL}}"
-									],
-									"path": [
-										"auth",
-										"user"
-									]
-								}
-							},
-							"status": "Unprocessable Content",
-							"code": 422,
-							"_postman_previewlanguage": "json",
-							"header": [
-								{
-									"key": "Host",
-									"value": "localhost:8000"
-								},
-								{
-									"key": "Connection",
-									"value": "close"
-								},
-								{
-									"key": "X-Powered-By",
-									"value": "PHP/8.2.12"
-								},
-								{
-									"key": "Cache-Control",
-									"value": "no-cache, private"
-								},
-								{
-									"key": "Date",
-									"value": "Sat, 07 Dec 2024 15:34:40 GMT"
-								},
-								{
-									"key": "Content-Type",
-									"value": "application/json"
-								},
-								{
-									"key": "Access-Control-Allow-Origin",
-									"value": "*"
-								}
-							],
-							"cookie": [],
-							"body": "{\n    \"message\": \"The email has already been taken.\",\n    \"errors\": {\n        \"email\": [\n            \"The email has already been taken.\"\n        ]\n    }\n}"
-						},
-						{
-							"name": "200",
-							"originalRequest": {
-								"method": "PATCH",
-								"header": [
-									{
-										"key": "Accept",
-										"value": "application/json",
-										"type": "text"
-									},
-									{
-										"key": "Content-Type",
-										"value": "application/json",
-										"type": "text"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\r\n    \"first_name\": \"John\",\r\n    \"last_name\": \"Doe\",\r\n    \"email\": \"johndoe@maildrop.cc\",\r\n    \"phone\": \"+1234567890\",\r\n    \"parent_email\": \"parent@example.com\",\r\n    \"parent_phone\": \"+9876543210\"\r\n}",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": {
-									"raw": "{{BASE_URL}}/auth/user",
-									"host": [
-										"{{BASE_URL}}"
-									],
-									"path": [
-										"auth",
-										"user"
-									]
-								}
-							},
-							"status": "OK",
-							"code": 200,
-							"_postman_previewlanguage": "json",
-							"header": [
-								{
-									"key": "Host",
-									"value": "localhost:8000"
-								},
-								{
-									"key": "Connection",
-									"value": "close"
-								},
-								{
-									"key": "X-Powered-By",
-									"value": "PHP/8.2.12"
-								},
-								{
-									"key": "Cache-Control",
-									"value": "no-cache, private"
-								},
-								{
-									"key": "Date",
-									"value": "Sat, 07 Dec 2024 15:47:30 GMT"
-								},
-								{
-									"key": "Content-Type",
-									"value": "application/json"
-								},
-								{
-									"key": "Access-Control-Allow-Origin",
-									"value": "*"
-								}
-							],
-							"cookie": [],
-							"body": "{\n    \"status\": \"200 OK\",\n    \"message\": \"User profile updated successfully.\",\n    \"data\": {\n        \"id\": 4,\n        \"name\": \"John Doe\",\n        \"email\": \"johndoe@maildrop.cc\",\n        \"email_verified_at\": null,\n        \"created_at\": \"2024-12-07T11:57:53.000000Z\",\n        \"updated_at\": \"2024-12-07T15:44:05.000000Z\",\n        \"role\": \"Admin\",\n        \"profile\": {\n            \"user_id\": 4,\n            \"phone\": \"+1234567890\",\n            \"parent_email\": \"parent@example.com\",\n            \"parent_phone\": \"+9876543210\"\n        }\n    }\n}"
-						},
 						{
 							"name": "200",
 							"originalRequest": {
@@ -1166,6 +1330,9 @@
 				{
 					"name": "Get Payment Plans",
 					"request": {
+						"auth": {
+							"type": "noauth"
+						},
 						"method": "GET",
 						"header": [
 							{
@@ -1691,7 +1858,7 @@
 							"variable": [
 								{
 									"key": "trx_reference",
-									"value": "mrZIKRzWKSRghxKGPLlGa2hpS"
+									"value": "asM6BsfwzcrgfbMuqLEdPMKw3"
 								}
 							]
 						},
@@ -1884,6 +2051,11 @@
 		{
 			"key": "BEARER_TOKEN",
 			"value": "2|6WagZMrbT2bgDaBum5oPeHGZtMxjR90LWmcK9rfyd9d2e8be",
+			"type": "string"
+		},
+		{
+			"key": "MFA_ORGANIZATION",
+			"value": "",
 			"type": "string"
 		}
 	]
