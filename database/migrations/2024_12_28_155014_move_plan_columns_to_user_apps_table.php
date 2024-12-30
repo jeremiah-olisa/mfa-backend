@@ -12,7 +12,7 @@ return new class extends Migration {
     {
         Schema::table('user_apps', function (Blueprint $table) {
             $table->string('plan')->nullable()->after('app');
-            $table->timestamp('plan_started_at')->nullable()->after('plan_duration');
+            $table->timestamp('plan_started_at')->nullable()->after('plan');
             $table->timestamp('plan_expires_at')->nullable()->after('plan_started_at');
         });
 
