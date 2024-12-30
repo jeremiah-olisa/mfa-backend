@@ -19,7 +19,7 @@ class SyllabusRepository extends BaseRepository
     public function getSyllabusByExam(string $exam): \Illuminate\Database\Eloquent\Collection
     {
         return $this->model->newQuery()->where('exam', $exam)
-            ->with('subject:id,name,label')
+            ->with('subject:id,name,label,icon_url')
             ->get();
     }
 }
