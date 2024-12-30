@@ -24,15 +24,15 @@ class SubjectSyllabusController extends Controller
 
         $subjects = $this->subjectService->getSubjectsWithMultipleQuestionsForExam($exam);
 
-        return $this->api_response('Subjects retrieved successfully', ['data' => $subjects]);
+        return $this->api_response('Subjects retrieved successfully', ['subjects' => $subjects]);
     }
 
     public function getSyllabusByExam(Request $request, $test_type = null)
     {
         $exam = $test_type ?? $this->getExamTypeFromHeader($request);
 
-        $subjects = $this->syllabusService->getSyllabusByExam($exam);
+        $syllabi = $this->syllabusService->getSyllabusByExam($exam);
 
-        return $this->api_response('Syllabi retrieved successfully', ['data' => $subjects]);
+        return $this->api_response('Syllabi retrieved successfully', ['syllabi' => $syllabi]);
     }
 }
