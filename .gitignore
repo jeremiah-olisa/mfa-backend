@@ -22,3 +22,4 @@ yarn-error.log
 /.vscode
 /.zed
 pnpm-lock.yaml
+.env.prod
