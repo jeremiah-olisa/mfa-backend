@@ -1,27 +1,13 @@
 ﻿<template>
-    <div
-        class="flex flex-col items-center justify-between space-y-4 sm:flex-row sm:space-y-0"
-    >
+    <div class="flex flex-col items-center justify-between space-y-4 sm:flex-row sm:space-y-0">
         <div class="flex items-center space-x-2">
             <!-- First Page Button -->
-            <Button
-                @click="goToFirstPage"
-                :disabled="!hasPrevPage"
-                variant="outline"
-                size="sm"
-                title="First"
-            >
+            <Button @click="goToFirstPage" :disabled="!hasPrevPage" variant="outline" size="sm" title="First">
                 <ChevronsLeft class="mr-2 h-4 w-4" />
             </Button>
 
             <!-- Previous Page Button -->
-            <Button
-                @click="goToPrevPage"
-                :disabled="!hasPrevPage"
-                variant="outline"
-                size="sm"
-                title="Previous"
-            >
+            <Button @click="goToPrevPage" :disabled="!hasPrevPage" variant="outline" size="sm" title="Previous">
                 <ChevronLeft class="mr-2 h-4 w-4" />
             </Button>
         </div>
@@ -31,16 +17,8 @@
             <label for="per-page" class="text-sm font-medium">
                 Per Page ({{ selectedPerPage }})
             </label>
-            <select
-                id="per-page"
-                v-model="selectedPerPage"
-                :class="selectClass"
-            >
-                <option
-                    v-for="option in perPageOptions"
-                    :key="option"
-                    :value="option"
-                >
+            <select id="per-page" v-model="selectedPerPage" :class="selectClass">
+                <option v-for="option in perPageOptions" :key="option" :value="option">
                     {{ option }}
                 </option>
             </select>
@@ -48,13 +26,7 @@
 
         <div>
             <!-- Next Page Button -->
-            <Button
-                @click="goToNextPage"
-                :disabled="!hasNextPage"
-                variant="outline"
-                size="sm"
-                title="Next"
-            >
+            <Button @click="goToNextPage" :disabled="!hasNextPage" variant="outline" size="sm" title="Next">
                 <ChevronRight class="ml-2 h-4 w-4" />
             </Button>
         </div>
@@ -74,7 +46,7 @@ const props = defineProps<PaginationProps>();
 
 // Internal state
 const selectedPerPage = ref(props.per_page);
-const perPageOptions = ref([15, 30, 50, 100]);
+const perPageOptions = ref([5, 10, 15, 30, 50, 100]);
 
 const hasPrevPage = ref(!!props.prev_page_url);
 const hasNextPage = ref(!!props.next_page_url);
@@ -95,8 +67,8 @@ watch([selectedPerPage], (newValue) => {
     router.visit(
         _route, // Keep the current route
         {
-            replace: true, // Avoid adding a new history entry
-            preserveState: true, // Preserve the current page state
+            replace: false, // Avoid adding a new history entry
+            preserveState: false, // Preserve the current page state
         },
     );
 });

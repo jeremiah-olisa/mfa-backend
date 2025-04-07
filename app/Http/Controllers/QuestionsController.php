@@ -48,13 +48,22 @@ class QuestionsController extends Controller
     {
         $validatedQuery = $request->validated();
         $response = $this->questionRepository->getPaginatedQuestionsWithSubject($validatedQuery, $request->query('per_page') ?? 15);
+
         $subjects = $this->subjectRepository->all(['id', 'label']);
 
+        $currentQueryParams = collect(request()->query())->except('page')->all();
+
         $pagination = [
-            'next_page_url' => $response->nextPageUrl(),
-            'prev_page_url' => $response->previousPageUrl(),
+            'next_page_url' => $response->nextPageUrl() ? 
+                $response->nextPageUrl() . '&' . http_build_query($currentQueryParams) : 
+                null,
+            'prev_page_url' => $response->previousPageUrl() ? 
+                $response->previousPageUrl() . '&' . http_build_query($currentQueryParams) : 
+                null,
             'per_page' => $response->perPage(),
             'current_page' => $response->path(),
+            'next_cursor' => $response->nextCursor(),
+            'prev_cursor' => $response->previousCursor(),
             'has_more_pages' => $response->hasMorePages(),
             'path' => $response->path(),
             'with_query_string' => $response->withQueryString(),

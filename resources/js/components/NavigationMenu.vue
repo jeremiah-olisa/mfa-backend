@@ -19,6 +19,13 @@ defineProps<{
   >
     Questions
   </component>
+  <component
+    :is="customComponent"
+    :href="route('users.list')"
+    :active="route().current('users.list')"
+  >
+    Users
+  </component>
 </template>
 
 <style scoped></style>

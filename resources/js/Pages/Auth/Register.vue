@@ -13,6 +13,7 @@ const form = useForm({
     password: '',
     password_confirmation: '',
     app: '',
+    phone: '',
     role: '',
 });
 
@@ -58,6 +59,19 @@ const selectClass =
                     autocomplete="username"
                 />
                 <InputError class="mt-2" :message="form.errors.email" />
+            </div>
+
+            <div class="mt-4">
+                <Label for="email">Phone Number</Label>
+                <Input
+                    id="phone"
+                    type="phone"
+                    class="mt-1 block w-full"
+                    v-model="form.phone"
+                    required
+                    autocomplete="phone"
+                />
+                <InputError class="mt-2" :message="form.errors.phone" />
             </div>
 
             <div class="mt-4">

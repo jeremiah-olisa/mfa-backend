@@ -36,6 +36,17 @@ Route::prefix('payment')->group(function () {
     Route::get('/success', [\App\Http\Controllers\PaymentController::class, 'success'])->name('payment.success');
 });
 Route::middleware('auth')->group(function () {
+    Route::prefix('users')->group(function () {
+        Route::get('/', [\App\Http\Controllers\UserController::class, 'list'])->name('users.list');
+    });
+
+    Route::prefix('questions')->group(function () {
+        Route::get('/', [QuestionsController::class, 'list'])->name('questions.list');
+        Route::post('/upload', [QuestionsController::class, 'upload'])->name('questions.upload');
+        Route::get('/{question_id}', [QuestionsController::class, 'details'])->name('questions.details');
+        Route::delete('/{question_id}', [QuestionsController::class, 'destroy'])->name('questions.destroy');
+    });
+
     Route::prefix('questions')->group(function () {
         Route::get('/', [QuestionsController::class, 'list'])->name('questions.list');
         Route::post('/upload', [QuestionsController::class, 'upload'])->name('questions.upload');

@@ -6,6 +6,7 @@ use App\Models\Question;
 use function Laravel\Prompts\search;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\DB;
+use App\Repositories\BaseRepository;
 
 /**
  * @template T of Question
@@ -39,7 +40,7 @@ class QuestionRepository extends BaseRepository
 
         // Apply subject filtering if provided
         if ($subject) {
-            $query->whereHas('subject', function ($query) use ($subject) {
+            $query = $query->whereHas('subject', function ($query) use ($subject) {
                 $query->where('name', 'LIKE', '%' . $subject . '%')
                     ->orWhere('label', 'LIKE', '%' . $subject . '%');
             });
@@ -48,7 +49,7 @@ class QuestionRepository extends BaseRepository
         // Apply subject filtering if provided
         // Filter by Question ID, Question, Test Type or Subject
         if ($search) {
-            $query->where(function ($query) use ($search) {
+           $query = $query->where(function ($query) use ($search) {
                 // Apply search to related subject fields
                 $query->whereHas('subject', function ($query) use ($search) {
                     $query->where('name', 'LIKE', '%' . $search . '%')

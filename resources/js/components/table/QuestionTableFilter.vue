@@ -14,11 +14,14 @@ const props = defineProps<{
     subjects: Question['subject'][];
     exams: string[];
 }>();
-const search = ref(undefined);
-const subject = ref(undefined);
-const question_id = ref(undefined);
-const test_type = ref(undefined);
-const question = ref(undefined);
+
+// Initialize refs with current route parameters
+const search = ref(route().params.search ?? undefined);
+const subject = ref(route().params.subject ?? undefined);
+const question_id = ref(route().params.question_id ?? undefined);
+const test_type = ref(route().params.test_type ?? undefined);
+const question = ref(route().params.question ?? undefined);
+
 
 watch(
     [search, subject, question_id, test_type, question],
@@ -41,8 +44,8 @@ watch(
         router.visit(
             _route, // Keep the current route
             {
-                replace: true, // Avoid adding a new history entry
-                preserveState: true, // Preserve the current page state
+                replace: false, // Avoid adding a new history entry
+                preserveState: false, // Preserve the current page state
             },
         );
     },
