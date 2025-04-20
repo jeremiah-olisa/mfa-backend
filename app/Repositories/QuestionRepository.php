@@ -7,6 +7,7 @@ use function Laravel\Prompts\search;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\DB;
 use App\Repositories\BaseRepository;
+use App\Utils\PaginationUtils;
 
 /**
  * @template T of Question
@@ -46,26 +47,28 @@ class QuestionRepository extends BaseRepository
             });
         }
 
-        // Apply subject filtering if provided
-        // Filter by Question ID, Question, Test Type or Subject
+        // Apply search filtering if provided
         if ($search) {
-           $query = $query->where(function ($query) use ($search) {
-                // Apply search to related subject fields
+            $query = $query->where(function ($query) use ($search) {
                 $query->whereHas('subject', function ($query) use ($search) {
                     $query->where('name', 'LIKE', '%' . $search . '%')
                         ->orWhere('label', 'LIKE', '%' . $search . '%');
                 })
-                    // Apply search to fields within the current model
                     ->orWhere('question_id', 'LIKE', '%' . $search . '%')
                     ->orWhere('question', 'LIKE', '%' . $search . '%')
                     ->orWhere('test_type', 'LIKE', '%' . $search . '%');
             });
         }
 
-        // Return paginated results
-        return $query->cursorPaginate($perPage);
-    }
+        // Get the paginated results
+        $paginator = $query->cursorPaginate($perPage);
 
+
+        return [
+            'data' => $paginator->items(),
+            'pagination' => PaginationUtils::formatCursorPagination($paginator)
+        ];
+    }
     public function deleteQuestionsByOrThrow(string $col, $value)
     {
         // Wrap in a database transaction to ensure atomicity

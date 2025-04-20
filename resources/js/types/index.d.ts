@@ -5,15 +5,6 @@ export interface User {
     email_verified_at?: string;
 }
 
-export interface UserTable {
-    id: number;
-    name: string;
-    email: string;
-    email_verified_at?: string;
-}
-
-
-
 export type PageProps<
     T extends Record<string, unknown> = Record<string, unknown>,
 > = T & {
@@ -50,4 +41,24 @@ export interface Question {
     created_at: string;
     updated_at: string;
     section: string;
+}
+
+export interface UserTable {
+    id: number
+    name: string
+    email: string
+    email_verified_at: any
+    created_at: string
+    updated_at: string
+    role: string
+    user_app: string
+    plan: any
+    plan_started_at: any
+    plan_expires_at: any
+    profile: Profile
+}
+
+export interface Profile {
+    user_id: number
+    phone: string
 }

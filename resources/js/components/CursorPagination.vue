@@ -1,46 +1,62 @@
 ﻿<template>
-    <div class="flex flex-col items-center justify-between space-y-4 sm:flex-row sm:space-y-0">
-        <div class="flex items-center space-x-2">
-            <!-- First Page Button -->
-            <Button @click="goToFirstPage" :disabled="!hasPrevPage" variant="outline" size="sm" title="First">
-                <ChevronsLeft class="mr-2 h-4 w-4" />
-            </Button>
-
-            <!-- Previous Page Button -->
-            <Button @click="goToPrevPage" :disabled="!hasPrevPage" variant="outline" size="sm" title="Previous">
-                <ChevronLeft class="mr-2 h-4 w-4" />
-            </Button>
+    <div class="flex flex-col items-center justify-between gap-4 px-4 py-3 sm:flex-row">
+        <!-- Combined record info -->
+        <div class="text-sm text-muted-foreground">
+            <span v-if="showRange">
+                Showing <span class="font-medium">{{ from }}–{{ to }}</span>
+                (<span class="font-medium">{{ itemsCount }}</span> records) of {{ total }}
+            </span>
+            <span v-else>
+                Showing <span class="font-medium">{{ itemsCount }}</span> records
+            </span>
         </div>
 
-        <div class="flex items-center space-x-2">
+        <!-- Pagination Controls -->
+        <div class="flex items-center space-x-6 lg:space-x-8">
             <!-- Per Page Selector -->
-            <label for="per-page" class="text-sm font-medium">
-                Per Page ({{ selectedPerPage }})
-            </label>
-            <select id="per-page" v-model="selectedPerPage" :class="selectClass">
-                <option v-for="option in perPageOptions" :key="option" :value="option">
-                    {{ option }}
-                </option>
-            </select>
-        </div>
+            <div class="flex items-center space-x-2">
+                <label for="per-page" class="text-sm font-medium">Rows per page</label>
+                <select id="per-page" v-model="selectedPerPage"
+                    class="h-8 rounded-md border border-input bg-background pl-2 pr-8 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                    <option v-for="option in perPageOptions" :key="option" :value="option">
+                        {{ option }}
+                    </option>
+                </select>
+            </div>
 
-        <div>
-            <!-- Next Page Button -->
-            <Button @click="goToNextPage" :disabled="!hasNextPage" variant="outline" size="sm" title="Next">
-                <ChevronRight class="ml-2 h-4 w-4" />
-            </Button>
+            <!-- Page Navigation -->
+            <div class="flex items-center space-x-2">
+                <Button variant="outline" size="sm" :disabled="!hasPrevPage" @click="goToPrevPage" class="h-8 w-8 p-0"
+                    title="Previous page">
+                    <span class="sr-only">Previous page</span>
+                    <ChevronLeft class="h-4 w-4" />
+                </Button>
+                <Button variant="outline" size="sm" :disabled="!hasNextPage" @click="goToNextPage" class="h-8 w-8 p-0"
+                    title="Next page">
+                    <span class="sr-only">Next page</span>
+                    <ChevronRight class="h-4 w-4" />
+                </Button>
+            </div>
         </div>
     </div>
 </template>
 
 <script setup lang="ts">
 import { Button } from '@/components/ui/button';
-import { PaginationProps } from '@/types';
+import { ChevronLeft, ChevronRight } from 'lucide-vue-next';
 import { router } from '@inertiajs/vue3';
-import { ChevronLeft, ChevronRight, ChevronsLeft } from 'lucide-vue-next';
-import { onMounted, ref, watch } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 
-// Define Props
+interface PaginationProps {
+    next_page_url: string | null;
+    prev_page_url: string | null;
+    path: string;
+    per_page: number;
+    items_count: number;
+    from?: number;
+    to?: number;
+    total?: number;
+}
 
 const props = defineProps<PaginationProps>();
 
@@ -48,61 +64,43 @@ const props = defineProps<PaginationProps>();
 const selectedPerPage = ref(props.per_page);
 const perPageOptions = ref([5, 10, 15, 30, 50, 100]);
 
-const hasPrevPage = ref(!!props.prev_page_url);
-const hasNextPage = ref(!!props.next_page_url);
+// Computed properties
+const hasPrevPage = computed(() => !!props.prev_page_url);
+const hasNextPage = computed(() => !!props.next_page_url);
+const itemsCount = computed(() => props.items_count);
+const showRange = computed(() => props.from !== undefined && props.to !== undefined);
 
-// Update `selectedPerPage` on prop change
-watch(
-    () => props.per_page,
-    (newValue) => {
-        selectedPerPage.value = newValue;
-    },
-);
-
-watch([selectedPerPage], (newValue) => {
-    const _route = route(String(route().current()), {
-        ...route().params,
-        per_page: newValue[0],
-    });
+// Watch for per_page changes
+watch(selectedPerPage, (newValue) => {
     router.visit(
-        _route, // Keep the current route
-        {
-            replace: false, // Avoid adding a new history entry
-            preserveState: false, // Preserve the current page state
+        route(String(route().current()), {
+            ...route().params,
+            per_page: newValue,
+            cursor: null // Reset cursor when changing page size
         },
-    );
+            {
+                preserveScroll: false,
+                preserveState: false,
+            }
+        ));
 });
 
+// Add current per_page value to options if not present
 onMounted(() => {
-    if (perPageOptions.value.includes(selectedPerPage.value)) return;
-
-    perPageOptions.value = [
-        selectedPerPage.value,
-        ...perPageOptions.value,
-    ].sort((a, b) => a - b);
+    if (!perPageOptions.value.includes(selectedPerPage.value)) {
+        perPageOptions.value = [
+            selectedPerPage.value,
+            ...perPageOptions.value,
+        ].sort((a, b) => a - b);
+    }
 });
 
-// Methods
+// Navigation methods
 const redirectPage = (url: string | null) => {
     if (!url) return;
-
-    try {
-        // Perform the redirection using Inertia
-        router.visit(url);
-    } catch (error) {
-        console.error('Error redirecting to page:', error);
-    }
+    router.visit(url, { preserveScroll: false, preserveState: false });
 };
 
-const goToFirstPage = () => redirectPage(props.current_page);
 const goToPrevPage = () => redirectPage(props.prev_page_url);
 const goToNextPage = () => redirectPage(props.next_page_url);
-
-const updatePerPage = () => {
-    const newUrl = `${props.path}?per_page=${selectedPerPage.value}`;
-    redirectPage(newUrl);
-};
-
-const selectClass =
-    'flex h-10 w-[70px] rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50';
 </script>

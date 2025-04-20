@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Constants\SetupConstant;
 use App\Http\Requests\GetQuestionsRequest;
 use App\Imports\QuestionsImport;
+use App\Utils\PaginationUtils;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\JsonResource;
 use App\Repositories\{QuestionRepository, SubjectRepository};
@@ -51,27 +52,9 @@ class QuestionsController extends Controller
 
         $subjects = $this->subjectRepository->all(['id', 'label']);
 
-        $currentQueryParams = collect(request()->query())->except('page')->all();
-
-        $pagination = [
-            'next_page_url' => $response->nextPageUrl() ? 
-                $response->nextPageUrl() . '&' . http_build_query($currentQueryParams) : 
-                null,
-            'prev_page_url' => $response->previousPageUrl() ? 
-                $response->previousPageUrl() . '&' . http_build_query($currentQueryParams) : 
-                null,
-            'per_page' => $response->perPage(),
-            'current_page' => $response->path(),
-            'next_cursor' => $response->nextCursor(),
-            'prev_cursor' => $response->previousCursor(),
-            'has_more_pages' => $response->hasMorePages(),
-            'path' => $response->path(),
-            'with_query_string' => $response->withQueryString(),
-        ];
-
         $data = [
-            'questions' => $response->items(),
-            'pagination' => $pagination,
+            'questions' => $response['data'],
+            'pagination' => $response['pagination'],
             'subjects' => $subjects,
             'exams' => SetupConstant::$exams
         ];

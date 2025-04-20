@@ -246,15 +246,20 @@ abstract class BaseRepository
     }
 
     /**
+     * @param \Closure|null $queryBuilder A closure that receives and modifies the query
      * @param array|string|null $queryParams
      * @param int $perPage
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function customAdvancedCursorPaginate(array|string|null $queryParams = null, int $perPage = 15): \Illuminate\Database\Eloquent\Builder
+    public function customAdvancedCursorPaginate(array|string|null $queryParams = null, int $perPage = 15,?\Closure $queryBuilder = null): \Illuminate\Database\Eloquent\Builder
     {
         data_forget($queryParams, 'per_page');
 
-        $query = $this->model->newQuery();
+        if ($queryBuilder instanceof \Closure) {
+            $query = $queryBuilder($this->model->newQuery());
+        }else{
+            $query = $this->model->newQuery();
+        }
 
         // Apply filtering and sorting
         $this->applyFiltersAndSorting($query, $queryParams);

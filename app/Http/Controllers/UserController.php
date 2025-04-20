@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Constants\SetupConstant;
 use App\Http\Requests\UpdateUserProfileRequest;
 use App\Repositories\UserRepository;
 use App\Services\UserService;
+use App\Utils\PaginationUtils;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use App\Http\Requests\GetUsersRequest;
@@ -44,29 +46,13 @@ class UserController extends Controller
     public function list(GetUsersRequest $request)
     {
         $validatedQuery = $request->validated();
-        $response = $this->userRepository->advancedCursorPaginate();
-
-        $currentQueryParams = collect(request()->query())->except('page')->all();
-
-        $pagination = [
-            'next_page_url' => $response->nextPageUrl() ? 
-                $response->nextPageUrl() . '&' . http_build_query($currentQueryParams) : 
-                null,
-            'prev_page_url' => $response->previousPageUrl() ? 
-                $response->previousPageUrl() . '&' . http_build_query($currentQueryParams) : 
-                null,
-            'next_cursor' => $response->nextCursor(),
-            'prev_cursor' => $response->previousCursor(),
-            'per_page' => $response->perPage(),
-            'current_page' => $response->path(),
-            'has_more_pages' => $response->hasMorePages(),
-            'path' => $response->path(),
-            'with_query_string' => $response->withQueryString(),
-        ];
+        $response = $this->userRepository->getUserAppList($validatedQuery, $request->query('per_page') ?? 15);
 
         $data = [
-            'users' => $response->items(),
-            'pagination' => $pagination,
+            'users' => $response['data'],
+            'pagination' => $response['pagination'],
+            'roles' => SetupConstant::$roles,
+            'apps' => SetupConstant::$apps,
         ];
 
         if (!$request->wantsJson())
