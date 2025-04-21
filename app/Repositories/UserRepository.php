@@ -2,9 +2,11 @@
 
 namespace App\Repositories;
 
+use App\Models\Referral;
 use App\Models\User;
 use App\Utils\PaginationUtils;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\ValidationException;
 
 /**
  * @template T of User
@@ -20,6 +22,7 @@ class UserRepository extends BaseRepository
     public function create(array $data): User
     {
         $data["password"] = isset($data["password"]) && !empty($data["password"]) ? Hash::make($data["password"]) : null;
+        $data["device_id"] = Referral::generateDeviceId();
 
         return parent::create($data);
     }
@@ -121,5 +124,16 @@ class UserRepository extends BaseRepository
             'data' => $paginator->items(),
             'pagination' => PaginationUtils::formatCursorPagination($paginator)
         ];
+    }
+
+    public function getUserByReferralCode($referral_code)
+    {
+        try {
+            return $this->model->where('referral_code', $referral_code)->select(['id'])->firstOrFail();
+        } catch (\Throwable $th) {
+            throw ValidationException::withMessages([
+                'referral_code' => 'User with referral code \'' . $referral_code . '\' not found',
+            ]);
+        }
     }
 }

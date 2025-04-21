@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Constants\SetupConstant;
 use App\Http\Controllers\Controller;
+use App\Repositories\ReferralRepository;
 use App\Repositories\UserRepository;
 use Exception;
 use Illuminate\Support\Facades\Http;
@@ -39,6 +40,7 @@ class RegisterController extends Controller
      */
     protected $redirectTo = '/dashboard';
     protected UserRepository $userRepository;
+    protected ReferralRepository $referralRepository;
 
     private $API_ERRORS = [
         '400' => 'Bad request. Please try again.',
@@ -54,9 +56,10 @@ class RegisterController extends Controller
      *
      * @return void
      */
-    public function __construct(UserRepository $userRepository)
+    public function __construct(UserRepository $userRepository, ReferralRepository $referralRepository)
     {
         $this->userRepository = $userRepository;
+        $this->referralRepository = $referralRepository;
         $this->middleware('guest');
     }
 
@@ -76,6 +79,8 @@ class RegisterController extends Controller
             'role' => ['required', 'string', 'in:' . implode(',', SetupConstant::$roles)],
             'phone' => ['required', 'string', 'regex:/^(070|080|081|090|091)\d{8}$/'], // Match specific prefixes and 11 digits
             'parent_phone' => ['nullable', 'string', 'regex:/^(070|080|081|090|091)\d{8}$/'], // Optional field with the same pattern
+            'device_id' => ['required', 'string', 'min:5'],
+            'referral_code' => ['nullable', 'string', 'min:5'],
         ]);
     }
 
@@ -87,14 +92,26 @@ class RegisterController extends Controller
      */
     protected function create(array $data)
     {
-        $user = $this->userRepository->create($data);
+        $referral_code = $data["referral_code"] ?? null;
+        unset($data["referral_code"]);
 
+        $user = null;
+        DB::transaction(function () use ($data, $referral_code, &$user) {
 
-        $user->profile()->updateOrCreate([], [
-            'phone' => $data['phone'] ?? null,
-            'parent_phone' => $data['parent_phone'] ?? null,
-        ]);
+            $user = $this->userRepository->create($data);
 
+            if (!empty($referral_code)) {
+                $referral = $this->userRepository->getUserByReferralCode($referral_code);
+                $this->referralRepository->createReferral($referral->id, $user->id, $referral_code);
+            }
+
+            $user->profile()->updateOrCreate([], [
+                'phone' => $data['phone'] ?? null,
+                'parent_phone' => $data['parent_phone'] ?? null,
+            ]);
+        });
+
+        $data["guardian"] = $data["parent_phone"] ?? null;
         $data["guardian"] = $data["parent_phone"] ?? null;
         unset($data["parent_phone"]);
 

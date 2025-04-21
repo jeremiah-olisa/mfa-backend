@@ -57,6 +57,7 @@ class LoginController extends Controller
         return $request->validate([
             $this->username() => 'required|string',
             'password' => 'required|string|min:6',
+            'deviceId' => 'required|string|min:3',
             'app' => 'required|string|in:' . implode(',', SetupConstant::$apps),
         ]);
     }
@@ -91,7 +92,7 @@ class LoginController extends Controller
                     'parent_phone' => $studentDetails['parent_phone'] ?? null,
                     'plan' => $studentDetails['plan'] ?? null,
                     'plan_duration' => isset($studentDetails['plan_duration'])
-                        ? (int)filter_var($studentDetails['plan_duration'], FILTER_VALIDATE_INT)
+                        ? (int) filter_var($studentDetails['plan_duration'], FILTER_VALIDATE_INT)
                         : null,
                     'plan_started_at' => $studentDetails['plan_started_at'] ?? null,
                     'plan_expires_at' => $studentDetails['plan_expires_at'] ?? null,
@@ -100,6 +101,7 @@ class LoginController extends Controller
 
             // Validate and associate the app with the user
             $app = $request->input('app') ?? null;
+
             $user->addAppToUser($app);
 
             DB::commit(); // Commit the transaction
@@ -229,7 +231,14 @@ class LoginController extends Controller
 
         $user = $this->userRepository->findByEmail($cred[$this->username()]);
 
+        // Check if the user exists and the device ID matches
+        $device_id = $request->input('deviceId');
+        if ($user && !$user->device_id != $device_id) {
+            $message = 'Device ID mismatch';
+            throw new UnauthorizedHttpException("Bearer", $message);
+        }
 
+        // Check if the user exists and the password is correct
         if ($user && Hash::check($cred['password'], $user->password))
             return Auth::loginUsingId($user->id, $request->boolean('remember'));
 
