@@ -27,22 +27,6 @@ return new class extends Migration {
         });
     }
 
-    protected function generateReferralCodes()
-    {
-        $users = \App\Models\User::whereNull('referral_code')->get();
-
-        foreach ($users as $user) {
-            $user->update([
-                'referral_code' => ReferralUtils::getReferralId()
-            ]);
-        }
-
-        // Finally make the column non-nullable
-        Schema::table('users', function (Blueprint $table) {
-            $table->string('referral_code', 6)->nullable(false)->change();
-        });
-    }
-
     /**
      * Reverse the migrations.
      */

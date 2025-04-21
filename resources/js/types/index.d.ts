@@ -52,7 +52,8 @@ export interface UserTable {
     updated_at: string
     role: string
     user_app: string
-    plan: any
+    referral_code: string,
+    plan: string,
     plan_started_at: any
     plan_expires_at: any
     profile: Profile

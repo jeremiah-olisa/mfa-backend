@@ -24,8 +24,8 @@ const formatDate = (date: string): string => {
     return new Date(date).toLocaleDateString(undefined, options);
 };
 
-const appBadgeClass = (app) => {
-    const apps = {
+const appBadgeClass = (app: string) => {
+    const apps: Record<string, string> = {
         'WAEC': 'bg-purple-100 text-purple-800',
         'NECO': 'bg-blue-100 text-blue-800',
         'JAMB': 'bg-green-100 text-green-800',
@@ -46,6 +46,8 @@ const appBadgeClass = (app) => {
                 <TableHead>Phone Number</TableHead>
                 <TableHead>Role</TableHead>
                 <TableHead>App</TableHead>
+                <TableHead>Referral Code</TableHead>
+                <TableHead>Current Plan</TableHead>
                 <TableHead>Registered At</TableHead>
                 <TableHead class="text-center">Actions</TableHead>
             </TableRow>
@@ -72,12 +74,16 @@ const appBadgeClass = (app) => {
                         {{ user?.user_app || 'N/A' }}
                     </span>
                 </TableCell>
-                <TableCell>{{ formatDate(user?.created_at) }}</TableCell>
-                <TableCell class="flex items-center justify-center gap-2">
-                    <Link href="" class="text-green-600 hover:text-green-800">
-                    <Pencil class="h-4 w-4" />
-                    </Link>
-                </TableCell>
+                <TableCell>{{ user?.referral_code || 'N/A' }}</TableCell>
+                <TableCell>
+                    {{ new Date(user?.plan_expires_at) < new Date() ? (user?.plan || 'N/A') : 'N/A' }} </TableCell>
+
+                        <TableCell>{{ formatDate(user?.created_at) }}</TableCell>
+                        <TableCell class="flex items-center justify-center gap-2">
+                            <Link href="" class="text-green-600 hover:text-green-800">
+                            <Pencil class="h-4 w-4" />
+                            </Link>
+                        </TableCell>
             </TableRow>
         </TableBody>
     </Table>

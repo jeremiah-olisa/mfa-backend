@@ -136,4 +136,17 @@ class UserRepository extends BaseRepository
             ]);
         }
     }
+
+    /**
+     * Clear device ID for one or multiple users
+     *
+     * @param int|array $userIds Single ID or array of user IDs
+     * @return int Number of affected users
+     */
+    public function clearDeviceId($userIds): int
+    {
+        return $this->model->whereIn('id', (array) $userIds)
+            ->whereNotNull('device_id')
+            ->update(['device_id' => null]);
+    }
 }

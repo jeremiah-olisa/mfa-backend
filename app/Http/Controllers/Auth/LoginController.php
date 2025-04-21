@@ -57,7 +57,7 @@ class LoginController extends Controller
         return $request->validate([
             $this->username() => 'required|string',
             'password' => 'required|string|min:6',
-            'deviceId' => 'required|string|min:3',
+            'deviceId' => 'nullable|string|min:3',
             'app' => 'required|string|in:' . implode(',', SetupConstant::$apps),
         ]);
     }
