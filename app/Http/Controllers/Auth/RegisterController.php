@@ -75,11 +75,11 @@ class RegisterController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'password' => ['required', 'string', 'min:6', 'confirmed'],
-            'app' => ['required', 'string', 'in:' . implode(',', SetupConstant::$apps)],
             'role' => ['required', 'string', 'in:' . implode(',', SetupConstant::$roles)],
             'phone' => ['required', 'string', 'regex:/^(070|080|081|090|091)\d{8}$/'], // Match specific prefixes and 11 digits
-            'parent_phone' => ['nullable', 'string', 'regex:/^(070|080|081|090|091)\d{8}$/'], // Optional field with the same pattern
             'device_id' => ['required', 'string', 'min:5'],
+            'parent_phone' => ['nullable', 'string', 'regex:/^(070|080|081|090|091)\d{8}$/'], // Optional field with the same pattern
+            'app' => ['nullable', 'string', 'in:' . implode(',', SetupConstant::$apps)],
             'referral_code' => ['nullable', 'string', 'min:5'],
         ]);
     }
@@ -109,6 +109,12 @@ class RegisterController extends Controller
                 'phone' => $data['phone'] ?? null,
                 'parent_phone' => $data['parent_phone'] ?? null,
             ]);
+
+            // Attach the app to the newly registered user
+            $app = $data['app'] ?? null;
+            if ($app) {
+                $user->addAppToUser($app);
+            }
         });
 
         $data["guardian"] = $data["parent_phone"] ?? null;
@@ -133,10 +139,8 @@ class RegisterController extends Controller
                 // User exists, check if they are registered for the app
                 $app = $requestData['app'] ?? null; // Ensure the app is in the request data
 
-                if ($app && !$user->userApps()->where('app', $app)->exists()) {
-                    // Attach the app to the user
-                    $user->userApps()->create(['app' => $app]);
-                }
+                // Attach the app to the user
+                $user->addAppToUser($app);
 
                 // Update UserProfile if phone or parent_phone is provided
                 if (!empty($requestData['phone']) || !empty($requestData['parent_phone'])) {
@@ -157,11 +161,6 @@ class RegisterController extends Controller
             // If user does not exist, proceed with the normal registration flow
             event(new Registered($user = $this->create($requestData)));
 
-            // Attach the app to the newly registered user
-            $app = $requestData['app'] ?? null;
-            if ($app) {
-                $user->addAppToUser($app);
-            }
             DB::commit(); // Commit the transaction
         } catch (\Exception $e) {
             DB::rollBack(); // Rollback on failure

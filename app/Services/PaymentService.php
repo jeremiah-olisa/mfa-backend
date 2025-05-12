@@ -17,6 +17,7 @@ use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 use Unicodeveloper\Paystack\Exceptions\PaymentVerificationFailedException;
 use Unicodeveloper\Paystack\Paystack;
 use Illuminate\Validation\ValidationException;
+use Throwable;
 
 class PaymentService extends Paystack
 {
@@ -27,14 +28,14 @@ class PaymentService extends Paystack
     protected UserProfileRepository $userProfileRepository;
     protected UserAppRepository $userAppRepository;
 
-//    protected Paystack $paystackService;
+    //    protected Paystack $paystackService;
 
     public function __construct(PaymentRepository $paymentRepository, PaymentPlanRepository $paymentPlanRepository, UserRepository $userRepository, UserProfileRepository $userProfileRepository, UserAppRepository $userAppRepository)
     {
         $this->paymentRepository = $paymentRepository;
         $this->paymentPlanRepository = $paymentPlanRepository;
         $this->userRepository = $userRepository;
-//        $this->paystackService = $paystackService;
+        //        $this->paystackService = $paystackService;
         $this->userProfileRepository = $userProfileRepository;
         $this->userAppRepository = $userAppRepository;
         parent::__construct();
@@ -67,6 +68,7 @@ class PaymentService extends Paystack
             'payment_plan_id' => $plan_id,
             'reference' => $reference,
             'amount' => $amount,
+            'app' => $app,
             'payment_method' => $paystack?->url ?? null,
         ]);
 
@@ -151,14 +153,14 @@ class PaymentService extends Paystack
         try {
             return $this->getPaymentData_v2($reference);
         } catch (PaymentVerificationFailedException $exception) {
-            throw  ValidationException::withMessages([$exception->getMessage()]);
-        } catch (ClientException  $e) {
+            throw ValidationException::withMessages([$exception->getMessage()]);
+        } catch (ClientException $e) {
             $message = json_decode($e->getResponse()->getBody()->getContents(), true);
             throw ValidationException::withMessages([$message['message']]);
-        } catch (\Exception|Throwable|HttpException $e) {
+        } catch (\Exception | Throwable | HttpException $e) {
             $statusCode = method_exists($e, 'getStatusCode') ? $e->getStatusCode() : 500;
 
-            throw  new HttpException($statusCode, $e->getMessage(), $e);
+            throw new HttpException($statusCode, $e->getMessage(), $e);
         }
     }
 

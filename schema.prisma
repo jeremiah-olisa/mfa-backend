@@ -1,0 +1,258 @@
+// schema.prisma
+
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "mysql"
+    url      = env("DATABASE_URL") // adjust this as needed
+}
+
+model Cache {
+    key        String @id
+    value      String
+    expiration Int
+}
+
+model CacheLock {
+    key        String @id
+    owner      String
+    expiration Int
+}
+
+model ExamSubjectSyllabus {
+    id           BigInt    @id @default(autoincrement())
+    exam         Exam
+    subjectId    BigInt
+    syllabusLink String
+    createdAt    DateTime? @default(now())
+    updatedAt    DateTime? @default(now())
+
+    Subject Subject @relation(fields: [subjectId], references: [id])
+}
+
+model FailedJob {
+    id         BigInt   @id @default(autoincrement())
+    uuid       String
+    connection String
+    queue      String
+    payload    String
+    exception  String
+    failedAt   DateTime @default(now())
+}
+
+model Job {
+    id          BigInt @id @default(autoincrement())
+    queue       String
+    payload     String
+    attempts    Int
+    reservedAt  Int?
+    availableAt Int
+    createdAt   Int
+}
+
+model JobBatch {
+    id           String  @id
+    name         String
+    totalJobs    Int
+    pendingJobs  Int
+    failedJobs   Int
+    failedJobIds String
+    options      String?
+    cancelledAt  Int?
+    createdAt    Int
+    finishedAt   Int?
+}
+
+model Migration {
+    id        Int    @id @default(autoincrement())
+    migration String
+    batch     Int
+}
+
+model Option {
+    id         BigInt    @id @default(autoincrement())
+    option     String
+    optionKey  String
+    isCorrect  Boolean   @default(false)
+    questionId BigInt
+    createdAt  DateTime? @default(now())
+    updatedAt  DateTime? @default(now())
+
+    Question Question @relation(fields: [questionId], references: [id])
+}
+
+model PasswordResetToken {
+    email     String    @id
+    token     String
+    createdAt DateTime?
+}
+
+model Payment {
+    id            BigInt    @id @default(autoincrement())
+    userId        BigInt
+    amount         Decimal
+    paymentMethod String?
+    status        String
+    reference     String @unique
+    paidAt        DateTime?
+    createdAt     DateTime? @default(now())
+    updatedAt     DateTime? @default(now())
+    paymentPlanId BigInt
+
+    PaymentPlan PaymentPlan @relation(fields: [paymentPlanId], references: [id])
+    User        User        @relation(fields: [userId], references: [id])
+}
+
+model PaymentPlan {
+    id          BigInt    @id @default(autoincrement())
+    name        String
+    amount      Decimal
+    duration    Int
+    description String?
+    createdAt   DateTime? @default(now())
+    updatedAt   DateTime? @default(now())
+
+    payments Payment[]
+}
+
+model PersonalAccessToken {
+    id            BigInt    @id @default(autoincrement())
+    tokenableType String
+    tokenableId   BigInt
+    name          String
+    token         String
+    abilities     String?
+    lastUsedAt    DateTime?
+    expiresAt     DateTime?
+    createdAt     DateTime? @default(now())
+    updatedAt     DateTime? @default(now())
+}
+
+model Question {
+    id         BigInt    @id @default(autoincrement())
+    questionId String
+    testType   TestType
+    subjectId  BigInt
+    question   String
+    createdAt  DateTime? @default(now())
+    updatedAt  DateTime? @default(now())
+    section    String?
+
+    Subject Subject  @relation(fields: [subjectId], references: [id])
+    Options Option[]
+}
+
+model Referral {
+    id         BigInt    @id @default(autoincrement())
+    referrerId BigInt
+    referredId BigInt
+    code       String
+    createdAt  DateTime? @default(now())
+    updatedAt  DateTime? @default(now())
+
+    Referrer User @relation("Referrer", fields: [referrerId], references: [id])
+    Referred User @relation("Referred", fields: [referredId], references: [id])
+}
+
+model Session {
+    id           String  @id
+    userId       BigInt?
+    ipAddress    String?
+    userAgent    String?
+    payload      String
+    lastActivity Int
+}
+
+model Subject {
+    id    BigInt  @id @default(autoincrement())
+    name  String
+    label String?
+
+    questions Question[]
+    syllabi   ExamSubjectSyllabus[]
+}
+
+model User {
+    id              BigInt    @id @default(autoincrement())
+    name            String
+    email           String    @unique
+    emailVerifiedAt DateTime?  @map("email_verified_at")
+    password        String
+    rememberToken   String?
+    createdAt       DateTime? @default(now())
+    updatedAt       DateTime? @default(now())
+    role            UserRole  @default(Student)
+    gender          Gender?
+    referralCode    String    @unique
+    deviceId        String?
+
+    // Relations
+    apps     UserApp[]
+    profiles UserProfile[]
+
+    payments          Payment[] // if you have payments related
+    referralsReferred Referral[] @relation("Referred")
+    referralsReferrer Referral[] @relation("Referrer")
+}
+
+model UserApp {
+    id            BigInt    @id @default(autoincrement())
+    app           AppType
+    plan          String?
+    planStartedAt DateTime?
+    planExpiresAt DateTime?
+    userId        BigInt
+    createdAt     DateTime? @default(now())
+    updatedAt     DateTime? @default(now())
+
+    user User @relation(fields: [userId], references: [id])
+}
+
+model UserProfile {
+    id          BigInt    @id @default(autoincrement())
+    userId      BigInt
+    phone       String?   @db.VarChar(15)
+    parentEmail String?
+    parentPhone String?   @db.VarChar(15)
+    createdAt   DateTime? @default(now())
+    updatedAt   DateTime? @default(now())
+
+    user User @relation(fields: [userId], references: [id])
+}
+
+enum UserRole {
+    Student
+    Admin
+    ContentManager
+    MarketingManager
+    SuperAdmin
+}
+
+enum Gender {
+    Male
+    Female
+}
+
+enum AppType {
+    WAEC
+    NECO
+    JAMB
+    OYO
+    WEB
+    ADMIN
+}
+
+enum Exam {
+    WAEC
+    NECO
+    JAMB
+}
+
+enum TestType {
+    WAEC
+    NECO
+    JAMB
+    OYO
+}
