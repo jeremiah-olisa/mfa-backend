@@ -240,7 +240,14 @@ class LoginController extends Controller
         $user = $this->userRepository->findByEmail($cred[$this->username()]);
 
         // Check if the user exists and the device ID matches
-        $device_id = $request->input('deviceId');
+        $device_id = $request->input('device_id') ?? $request->input('deviceId');
+
+        $mfaOrganizationHeader = strtoupper($request->header('MFA_ORGANIZATION'));
+
+        if (empty(trim($device_id)) && $mfaOrganizationHeader != SetupConstant::$apps[5]) {
+            throw ValidationException::withMessages(['Device ID is required']);
+        }
+
         if ($user) {
             if ($user->device_id === null && $device_id !== null) {
                 $user->device_id = $device_id;

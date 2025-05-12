@@ -77,10 +77,19 @@ class RegisterController extends Controller
             'password' => ['required', 'string', 'min:6', 'confirmed'],
             'role' => ['required', 'string', 'in:' . implode(',', SetupConstant::$roles)],
             'phone' => ['required', 'string', 'regex:/^(070|080|081|090|091)\d{8}$/'], // Match specific prefixes and 11 digits
-            'device_id' => ['required', 'string', 'min:5'],
             'parent_phone' => ['nullable', 'string', 'regex:/^(070|080|081|090|091)\d{8}$/'], // Optional field with the same pattern
-            'app' => ['nullable', 'string', 'in:' . implode(',', SetupConstant::$apps)],
             'referral_code' => ['nullable', 'string', 'min:5'],
+            'app' => ['nullable', 'string', 'in:' . implode(',', SetupConstant::$apps)],
+            'device_id' => [
+                'string',
+                'min:5',
+                function ($attribute, $value, $fail) use ($data) {
+                    $app = $data['app'] ?? null;
+                    if (!is_null($app) && strtolower($app) !== 'admin' && empty($value)) {
+                        $fail('The ' . $attribute . ' field is required when app is not ADMIN.');
+                    }
+                }
+            ],
         ]);
     }
 
