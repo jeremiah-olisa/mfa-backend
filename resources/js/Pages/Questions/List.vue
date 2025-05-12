@@ -16,20 +16,20 @@ const props = defineProps<{
 }>();
 
 const questions = ref(props.questions ?? []);
-const pagination = ref(props.pagination ?? {});
+const pagination = ref({
+    ...props.pagination,
+    items_count: props.questions.length ?? 0,
+});
 </script>
 
 <template>
+
     <Head title="Questions List" />
 
     <AuthenticatedLayout>
         <template #header>
-            <div
-                class="flex w-full flex-wrap items-center justify-between gap-y-3"
-            >
-                <h2
-                    class="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200"
-                >
+            <div class="flex w-full flex-wrap items-center justify-between gap-y-3">
+                <h2 class="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">
                     Questions
                 </h2>
 

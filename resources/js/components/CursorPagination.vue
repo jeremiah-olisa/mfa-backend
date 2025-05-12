@@ -72,17 +72,16 @@ const showRange = computed(() => props.from !== undefined && props.to !== undefi
 
 // Watch for per_page changes
 watch(selectedPerPage, (newValue) => {
-    router.visit(
-        route(String(route().current()), {
-            ...route().params,
-            per_page: newValue,
-            cursor: null // Reset cursor when changing page size
-        },
-            {
-                preserveScroll: false,
-                preserveState: false,
-            }
-        ));
+    const url = route(String(route().current() || ''), {
+        ...route().params,
+        per_page: newValue,
+        cursor: null,
+    });
+
+    router.visit(url, {
+        preserveScroll: false,
+        preserveState: false,
+    });
 });
 
 // Add current per_page value to options if not present

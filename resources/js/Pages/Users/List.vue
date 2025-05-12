@@ -15,7 +15,10 @@ const props = defineProps<{
 }>();
 
 const users = ref(props.users ?? []);
-const pagination = ref(props.pagination ?? {});
+const pagination = ref({
+    ...props.pagination,
+    items_count: props.users?.length || 0,
+});
 </script>
 
 <template>
