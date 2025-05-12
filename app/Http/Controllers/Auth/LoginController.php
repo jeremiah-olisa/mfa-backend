@@ -57,8 +57,15 @@ class LoginController extends Controller
         return $request->validate([
             $this->username() => 'required|string',
             'password' => 'required|string|min:6',
-            'deviceId' => 'nullable|string|min:3',
             'app' => 'required|string|in:' . implode(',', SetupConstant::$apps),
+            'deviceId' => [
+                function ($attribute, $value, $fail) use ($request) {
+                    $app = strtoupper($request->input('app'));
+                    if ($app !== SetupConstant::$apps[5] && (is_null($value) || strlen($value) < 3)) {
+                        $fail('The ' . $attribute . ' is required and must be at least 3 characters unless app is ADMIN.');
+                    }
+                }
+            ]
         ]);
     }
 
@@ -175,6 +182,7 @@ class LoginController extends Controller
 
         $this->clearLoginAttempts($request);
 
+        /** @var \App\Models\User|null $user */
         $user = $this->guard($request->wantsJson() ? 'api' : 'web')->user();
 
 
@@ -233,9 +241,14 @@ class LoginController extends Controller
 
         // Check if the user exists and the device ID matches
         $device_id = $request->input('deviceId');
-        if ($user && !$user->device_id != $device_id) {
-            $message = 'Device ID mismatch';
-            throw new UnauthorizedHttpException("Bearer", $message);
+        if ($user) {
+            if ($user->device_id === null && $device_id !== null) {
+                $user->device_id = $device_id;
+                $user->save();
+            } elseif ($user->device_id !== $device_id) {
+                $message = 'Device ID mismatch';
+                throw new UnauthorizedHttpException("Bearer", $message);
+            }
         }
 
         // Check if the user exists and the password is correct

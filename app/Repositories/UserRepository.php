@@ -5,6 +5,7 @@ namespace App\Repositories;
 use App\Models\Referral;
 use App\Models\User;
 use App\Utils\PaginationUtils;
+use App\Utils\ReferralUtils;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 
@@ -22,7 +23,8 @@ class UserRepository extends BaseRepository
     public function create(array $data): User
     {
         $data["password"] = isset($data["password"]) && !empty($data["password"]) ? Hash::make($data["password"]) : null;
-        $data["device_id"] = Referral::generateDeviceId();
+        $data["device_id"] = isset($data['device_id']) ? $data['device_id'] : null;
+        $data["referral_code"] = isset($data['referral_code']) ? $data['referral_code'] : ReferralUtils::getReferralId();
 
         return parent::create($data);
     }
