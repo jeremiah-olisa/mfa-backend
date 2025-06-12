@@ -57,7 +57,7 @@ class User extends Authenticatable
 
     public function userAppsByApp(string $app)
     {
-        return $this->userApps()->where('app', $app)->get();
+        return $this->userApps()->where('app', $app)->orderByDesc('plan_expires_at')->first();
     }
 
     public function addAppToUser($app)
