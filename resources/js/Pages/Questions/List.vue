@@ -28,7 +28,7 @@ const pagination = ref({
 
     <AuthenticatedLayout>
         <template #header>
-            <div class="flex w-full flex-wrap items-center justify-between gap-y-3">
+            <div class="flex w-full flex-wrap flex-col justify-between gap-y-3">
                 <h2 class="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">
                     Questions
                 </h2>

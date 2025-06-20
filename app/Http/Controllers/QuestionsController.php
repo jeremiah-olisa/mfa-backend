@@ -6,6 +6,7 @@ use App\Constants\SetupConstant;
 use App\Http\Requests\GetQuestionsRequest;
 use App\Imports\QuestionsImport;
 use App\Imports\QuestionsImportV2;
+use App\Imports\SmartMultipleQuestionsImport;
 use App\Imports\SmartQuestionsImport;
 use App\Utils\PaginationUtils;
 use Illuminate\Http\JsonResponse;
@@ -146,6 +147,21 @@ class QuestionsController extends Controller
         $import->handleErrorsAndFailures();
 
         return redirect()->back()->with('success', 'Questions uploaded successfully (auto-detected format).');
-
     }
+
+    public function multipleSmartUpload(Request $request)
+    {
+        $request->validate([
+            'files.*' => 'required|file|mimes:csv,txt,xlsx,xls|max:2048'
+        ]);
+
+        $multiImporter = new SmartMultipleQuestionsImport($request->file('files'));
+        $multiImporter->importFiles();
+        $successCount = $multiImporter->getSuccessCount();
+        $multiImporter->handleErrorsAndFailures();
+
+        return redirect()->back()
+            ->with('success', "All {$successCount} files were processed successfully!");
+    }
+
 }

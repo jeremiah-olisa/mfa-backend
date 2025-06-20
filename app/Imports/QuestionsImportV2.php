@@ -4,6 +4,7 @@ namespace App\Imports;
 
 use App\Constants\SetupConstant;
 use App\Models\{Question, Subject};
+use App\Traits\TracksFileName;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -19,7 +20,7 @@ use Maatwebsite\Excel\Validators\Failure;
 
 class QuestionsImportV2 implements ToModel, WithStartRow, WithValidation, SkipsEmptyRows, SkipsOnFailure, SkipsOnError
 {
-    use SkipsFailures, SkipsErrors;
+    use SkipsFailures, SkipsErrors, TracksFileName;
 
     public function startRow(): int
     {
@@ -34,7 +35,7 @@ class QuestionsImportV2 implements ToModel, WithStartRow, WithValidation, SkipsE
         // Create the question
         $question = Question::create([
             'question_id' => $questionId,
-            'test_type' => trim(strval($row[3])), // examType
+            'test_type' => strtoupper(trim(strval($row[3]))), // examType
             'section' => '', // No section in new format
             'subject_id' => Subject::where('name', trim(strval($row[4])))->firstOrFail()->id, // subject
             'question' => trim(strval($row[0])), // question
@@ -55,9 +56,6 @@ class QuestionsImportV2 implements ToModel, WithStartRow, WithValidation, SkipsE
             ]);
         }
 
-        Log::info("IMPORT Creation");
-
-
         return $question;
     }
 
@@ -75,7 +73,7 @@ class QuestionsImportV2 implements ToModel, WithStartRow, WithValidation, SkipsE
         return [
             '0' => ['required', 'max:1000', 'unique:questions,question'], // question
             '1' => ['nullable', 'max:255'], // questionImage
-            '3' => ['required', 'in:' . implode(',', SetupConstant::$exams)], // examType
+            '3' => ['required', 'in:' . implode(',', array_map('strtolower', SetupConstant::$exams))], // exam type
             '4' => ['required', 'exists:subjects,name'], // subject
             '5' => ['required', 'json'], // options
         ];
@@ -159,5 +157,10 @@ class QuestionsImportV2 implements ToModel, WithStartRow, WithValidation, SkipsE
 
             throw ValidationException::withMessages($flattenedMessages);
         }
+    }
+
+    public function getErrors()
+    {
+        return $this->errors;
     }
 }

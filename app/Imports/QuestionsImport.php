@@ -15,11 +15,12 @@ use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithStartRow;
 use Maatwebsite\Excel\Concerns\WithValidation;
 use App\Models\{Question, Subject};
+use App\Traits\TracksFileName;
 use Maatwebsite\Excel\Validators\Failure;
 
 class QuestionsImport implements ToModel, WithStartRow, WithValidation, SkipsEmptyRows, SkipsOnFailure, SkipsOnError
 {
-    use SkipsFailures, SkipsErrors;
+    use SkipsFailures, SkipsErrors, TracksFileName;
 
     public function startRow(): int
     {
@@ -76,7 +77,7 @@ class QuestionsImport implements ToModel, WithStartRow, WithValidation, SkipsEmp
     /**
      * @param Failure[] $failures
      */
-//    public function onFailure(Failure ...$failures)
+    //    public function onFailure(Failure ...$failures)
 //    {
 //        // Ensure $errors is initialized
 //        $this->errors = $this->errors ?? [];
@@ -226,4 +227,8 @@ class QuestionsImport implements ToModel, WithStartRow, WithValidation, SkipsEmp
         }
     }
 
+    public function getErrors()
+    {
+        return $this->errors;
+    }
 }

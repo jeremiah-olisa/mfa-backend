@@ -5,12 +5,6 @@ namespace App\Imports;
 use App\Imports\QuestionsImport;
 use App\Imports\QuestionsImportV2;
 use Illuminate\Support\Facades\Log;
-use Maatwebsite\Excel\Concerns\SkipsErrors;
-use Maatwebsite\Excel\Concerns\SkipsFailures;
-use Maatwebsite\Excel\Concerns\WithMultipleSheets;
-use Maatwebsite\Excel\Concerns\SkipsOnFailure;
-use Maatwebsite\Excel\Concerns\SkipsOnError;
-use Maatwebsite\Excel\Concerns\WithValidation;
 
 class SmartQuestionsImport
 {

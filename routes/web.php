@@ -45,6 +45,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/upload', [QuestionsController::class, 'upload'])->name('questions.upload');
         Route::post('/upload/v2', [QuestionsController::class, 'uploadV2'])->name('questions.upload.v2');
         Route::post('/upload/smart', [QuestionsController::class, 'smartUpload'])->name('questions.upload.smart');
+        Route::post('/upload/multiple/smart', [QuestionsController::class, 'multipleSmartUpload'])->name('questions.upload.multiple-smart');
         Route::get('/{question_id}', [QuestionsController::class, 'details'])->name('questions.details');
         Route::delete('/{question_id}', [QuestionsController::class, 'destroy'])->name('questions.destroy');
     });
