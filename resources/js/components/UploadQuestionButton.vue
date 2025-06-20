@@ -1,107 +1,130 @@
 ﻿<script setup lang="ts">
 import { Button } from '@/components/ui/button';
-import { Upload, X } from 'lucide-vue-next';
-
+import { Upload, X, RefreshCw, CheckCircle, AlertTriangle } from 'lucide-vue-next';
 import FormErrorAlert from '@/components/FormErrorAlert.vue';
 import { useForm } from '@inertiajs/vue3';
 import { ref } from 'vue';
 
-// Create a ref for the file input element
 const fileInput = ref<HTMLInputElement | null>(null);
-
-// Reactive variable to store the file name
 const fileName = ref<string | null>(null);
+const uploadProgress = ref<number>(0);
+const showSuccess = ref<boolean>(false);
 
 const form = useForm({
     file: null as File | null,
 });
-// Function to trigger the file input dialog
+
 const triggerFileInput = () => {
-    if (fileInput.value) {
-        fileInput.value.click(); // Programmatically open the file input
+    if (fileInput.value && !form.processing) {
+        fileInput.value.click();
     }
 };
 
 const reset = () => {
+    if (form.processing) return;
+
     fileName.value = null;
     form.file = null;
+    form.errors = {};
+    uploadProgress.value = 0;
+    showSuccess.value = false;
+
+    if (fileInput.value) {
+        fileInput.value.value = '';
+    }
 };
 
-// Handle file selection
 const handleFileChange = (event: Event) => {
-    form.file = null;
     const fileInputElement = event.target as HTMLInputElement;
-    if (fileInputElement.files && fileInputElement.files[0]) {
-        fileName.value = fileInputElement.files[0].name; // Set the file name
-        // Optionally, you can upload the file here
-        uploadFile(fileInputElement.files[0]);
-        return;
+    if (fileInputElement.files?.[0]) {
+        fileName.value = fileInputElement.files[0].name;
+        form.file = fileInputElement.files[0];
+        submitForm();
+    } else {
+        reset();
     }
-    fileName.value = null;
+};
+
+const retryUpload = () => {
+    if (form.file) {
+        submitForm();
+    }
 };
 
 const submitForm = () => {
-    if (form.file) {
-        // You can send the form data to your server
-        form.post(route('questions.upload'), {
-            onSuccess: () => {
-                // You can handle successful upload here
-                console.log('File uploaded successfully');
-                fileName.value = null; // Reset after successful upload
-            },
-            onError: (errors) => {
-                // Handle errors if any
-                console.log('Upload failed:', errors);
-                fileName.value = null; // Reset after successful upload
-            },
-        });
-    }
-};
+    if (!form.file) return;
 
-// Example file upload function (customize as needed)
-const uploadFile = (file: File) => {
-    // Handle file upload, e.g., send the file to a server or store it locally
-    console.log('Uploading file:', file.name);
-    form.file = file;
-    submitForm();
+    showSuccess.value = false;
+
+    form.post(route('questions.upload'), {
+        onProgress: (progress) => {
+            uploadProgress.value = Math.round(progress?.percentage || 75);
+        },
+        onSuccess: () => {
+            showSuccess.value = true;
+            setTimeout(() => showSuccess.value = false, 3000);
+            reset();
+        },
+        onError: () => {
+            // Errors are automatically handled by form.errors
+        },
+    });
 };
 </script>
 
 <template>
-    <Button
-        variant="outline"
-        @click="triggerFileInput"
-        :disabled="form.processing"
-        class="h-auto text-wrap"
-    >
-        <Upload class="mr-2" />
-        {{ form.processing ? 'Uploading' : 'Upload' }}
-        {{ fileName ?? 'Questions' }}
+    <div class="flex flex-col gap-3">
+        <div class="flex items-center gap-2 flex-wrap">
+            <!-- Main upload button -->
+            <Button variant="outline" @click="triggerFileInput" :disabled="form.processing"
+                class="h-auto text-wrap min-w-[120px] relative">
+                <Upload class="mr-2 h-4 w-4" />
+                <span class="truncate max-w-[180px]">
+                    {{ form.processing ? 'Uploading...' : fileName ?? 'Upload Questions' }}
+                </span>
+            </Button>
 
-        <X
-            v-if="form.file"
-            :disabled="form.processing"
-            @click="reset"
-            class="mr-2 text-red-500 dark:text-red-300"
-        />
-    </Button>
+            <!-- Clear button -->
+            <Button v-if="form.file && !form.processing" variant="ghost" size="sm" @click="reset"
+                class="text-destructive hover:text-destructive">
+                <X class="h-4 w-4 mr-1" />
+                Clear
+            </Button>
 
-    <!-- Hidden file input triggered by the button -->
-    <input
-        ref="fileInput"
-        type="file"
-        accept=".xls,.xlsx,.csv"
-        @change="handleFileChange"
-        class="hidden"
-    />
+            <!-- Retry button -->
+            <Button v-if="form.errors && Object.keys(form.errors).length > 0 && !form.processing" variant="outline"
+                size="sm" @click="retryUpload" class="text-amber-600 dark:text-amber-400">
+                <RefreshCw class="h-4 w-4 mr-1" />
+                Retry
+            </Button>
+        </div>
 
+        <!-- Progress indicator -->
+        <div v-if="form.processing" class="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
+            <div class="bg-primary h-2.5 rounded-full" :style="{ width: `${uploadProgress}%` }"></div>
+        </div>
+
+        <!-- Success message -->
+        <div v-if="showSuccess" class="flex items-center text-sm text-green-600 dark:text-green-400">
+            <CheckCircle class="h-4 w-4 mr-1" />
+            File uploaded successfully!
+        </div>
+
+        <!-- Hidden file input -->
+        <input ref="fileInput" type="file" accept=".xls,.xlsx,.csv" @change="handleFileChange" class="hidden" />
+    </div>
+
+    <!-- Error display -->
     <Teleport defer to="#teleport-alert">
-        <FormErrorAlert
-            :show-field-name="false"
-            :errors="form.errors"
-            :error-title="`File Upload Error (${Object.keys(form.errors).length} Errors)`"
-        />
+        <FormErrorAlert v-if="Object.keys(form.errors).length > 0" :show-field-name="false" :errors="form.errors"
+            :error-title="`Upload Error (${Object.keys(form.errors).length} ${Object.keys(form.errors).length === 1 ? 'Error' : 'Errors'})`" />
     </Teleport>
 </template>
 
-<style scoped></style>
+<style scoped>
+.truncate {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+</style>
