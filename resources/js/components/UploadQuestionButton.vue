@@ -85,8 +85,8 @@ const submitForm = () => {
             </Button>
 
             <!-- Clear button -->
-            <Button v-if="form.file && !form.processing" variant="ghost" size="sm" @click="reset"
-                class="text-destructive hover:text-destructive">
+            <Button v-if="form.file && !form.processing" variant="outline" size="sm" @click="reset"
+                class="text-destructive dark:text-red-300 hover:text-destructive">
                 <X class="h-4 w-4 mr-1" />
                 Clear
             </Button>
