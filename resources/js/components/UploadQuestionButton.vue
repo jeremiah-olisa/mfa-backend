@@ -194,8 +194,8 @@ const handleDrop = (e: DragEvent) => {
         </div>
 
         <!-- Hidden file input -->
-        <input ref="fileInput" type="file" accept=".xls,.xlsx,.csv" @change="handleFileChange" multiple
-            class="hidden" />
+        <input ref="fileInput" class="hidden" type="file" accept=".xls,.xlsx,.csv" :data-max-files="MAX_FILES_UPLOAD"
+            @change="handleFileChange" multiple />
     </div>
 
     <!-- Error display -->
