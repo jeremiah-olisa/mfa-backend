@@ -152,7 +152,7 @@ class QuestionsController extends Controller
     public function multipleSmartUpload(Request $request)
     {
         $request->validate([
-            'files.*' => 'required|file|mimes:csv,txt,xlsx,xls|max:3048'
+            'files.*' => 'required|file|mimes:csv,txt,xlsx,xls|max:5048'
         ]);
 
         $multiImporter = new SmartMultipleQuestionsImport($request->file('files'));
