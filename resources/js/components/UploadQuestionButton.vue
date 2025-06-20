@@ -56,7 +56,7 @@ const submitForm = () => {
 
     showSuccess.value = false;
 
-    form.post(route('questions.upload'), {
+    form.post(route('questions.upload.smart'), {
         onProgress: (progress) => {
             uploadProgress.value = Math.round(progress?.percentage || 75);
         },
