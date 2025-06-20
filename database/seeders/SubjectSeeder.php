@@ -119,11 +119,6 @@ class SubjectSeeder extends Seeder
                 'icon_url' => asset("subjects/AnimalHusbandry.png")
             ],
             [
-                'label' => 'Civic Education',
-                'name' => Subjects::Civiledu, // Using existing Civiledu enum case
-                'icon_url' => asset("subjects/CivicEducation.png")
-            ],
-            [
                 'label' => 'Computer Science',
                 'name' => Subjects::ComputerScience,
                 'icon_url' => asset("subjects/ComputerScience.png")
