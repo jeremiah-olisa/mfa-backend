@@ -106,15 +106,39 @@ class SubjectSeeder extends Seeder
                 'name' => Subjects::Physics,
                 'icon_url' => asset("subjects/IRK.png")
             ],
+
+            // New subjects using enum cases
+            [
+                'label' => 'Data Processing',
+                'name' => Subjects::DataProcessing,
+                'icon_url' => asset("subjects/DataProcessing.png")
+            ],
+            [
+                'label' => 'Animal Husbandry',
+                'name' => Subjects::AnimalHusbandry,
+                'icon_url' => asset("subjects/AnimalHusbandry.png")
+            ],
+            [
+                'label' => 'Civic Education',
+                'name' => Subjects::Civiledu, // Using existing Civiledu enum case
+                'icon_url' => asset("subjects/CivicEducation.png")
+            ],
+            [
+                'label' => 'Computer Science',
+                'name' => Subjects::ComputerScience,
+                'icon_url' => asset("subjects/ComputerScience.png")
+            ],
         ];
 
         // Insert subjects into the database
         foreach ($subjectList as $subject) {
-            Subject::query()->upsert([
-                'label' => $subject['label'],
-                'name' => $subject['name'],
-                'icon_url' => $subject['icon_url'],
-            ], ['label', 'name']);
+            Subject::updateOrCreate(
+                ['name' => $subject['name']],
+                [
+                    'label' => $subject['label'],
+                    'icon_url' => $subject['icon_url']
+                ]
+            );
         }
     }
 }
