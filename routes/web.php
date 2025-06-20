@@ -43,6 +43,8 @@ Route::middleware('auth')->group(function () {
     Route::prefix('questions')->group(function () {
         Route::get('/', [QuestionsController::class, 'list'])->name('questions.list');
         Route::post('/upload', [QuestionsController::class, 'upload'])->name('questions.upload');
+        Route::post('/upload/v2', [QuestionsController::class, 'uploadV2'])->name('questions.upload.v2');
+        Route::post('/upload/smart', [QuestionsController::class, 'smartUpload'])->name('questions.upload.smart');
         Route::get('/{question_id}', [QuestionsController::class, 'details'])->name('questions.details');
         Route::delete('/{question_id}', [QuestionsController::class, 'destroy'])->name('questions.destroy');
     });
