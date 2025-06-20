@@ -4,7 +4,7 @@ import { Upload, X, RefreshCw, CheckCircle, AlertTriangle, FileText } from 'luci
 import FormErrorAlert from '@/components/FormErrorAlert.vue';
 import { useForm } from '@inertiajs/vue3';
 import { ref, computed } from 'vue';
-const MAX_FILES_UPLOAD = 20;
+const MAX_FILES_UPLOAD = 5;
 const fileInput = ref<HTMLInputElement | null>(null);
 const fileNames = ref<string[]>([]);
 const uploadProgress = ref<number>(0);
@@ -24,12 +24,13 @@ const triggerFileInput = () => {
     }
 };
 
-const reset = () => {
+const reset = (resetErr = true) => {
     if (form.processing) return;
 
     fileNames.value = [];
     form.files = [];
-    form.errors = {};
+    if (resetErr)
+        form.errors = {};
     uploadProgress.value = 0;
     showSuccess.value = false;
 
@@ -77,8 +78,14 @@ const submitForm = () => {
         },
         onSuccess: () => {
             showSuccess.value = true;
-            setTimeout(() => showSuccess.value = false, 3000);
-            reset();
+            reset(false);
+            setTimeout(() => {
+                // Reload the page after showing success message
+                showSuccess.value = false;
+
+                // if (form.errors && Object.keys(form.errors).length > 0)
+                window.location.reload();
+            }, 5000);
         },
         onError: () => {
             // Errors are automatically handled by form.errors

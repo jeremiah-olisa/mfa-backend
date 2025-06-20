@@ -12,7 +12,7 @@ trait ImportModelTraits
 {
     public function batchSize(): int
     {
-        return 1000;
+        return 100;
     }
 
     public function startRow(): int
