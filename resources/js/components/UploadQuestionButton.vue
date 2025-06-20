@@ -29,7 +29,7 @@ const reset = (resetErr = true) => {
 
     fileNames.value = [];
     form.files = [];
-    if (resetErr)
+    if (resetErr == true)
         form.errors = {};
     uploadProgress.value = 0;
     showSuccess.value = false;
