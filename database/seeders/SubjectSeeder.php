@@ -133,7 +133,7 @@ class SubjectSeeder extends Seeder
         // Insert subjects into the database
         foreach ($subjectList as $subject) {
             Subject::updateOrCreate(
-                ['name' => $subject['name']],
+                ['name' => $subject['name'], 'label' => $subject['label'],],
                 [
                     'label' => $subject['label'],
                     'icon_url' => $subject['icon_url']
