@@ -102,7 +102,7 @@ class QuestionsController extends Controller
         ]);
 
         $import = new QuestionsImport();
-        Excel::import($import, $request->file('file'));
+        $this->uploadQuestion($import, $request->file('file'));
         $import->handleErrorsAndFailures();
 
         return redirect()->back()->with('success', 'Questions uploaded successfully.');
@@ -119,7 +119,7 @@ class QuestionsController extends Controller
         ]);
 
         $import = new QuestionsImportV2();
-        Excel::import($import, $request->file('file'));
+        $this->uploadQuestion($import, $request->file('file'));
         $import->handleErrorsAndFailures();
 
         return redirect()->back()->with('success', 'Questions (V2 format) uploaded successfully.');
@@ -140,7 +140,7 @@ class QuestionsController extends Controller
         $smartImport = new SmartQuestionsImport($filePath);
         $import = $smartImport->selectedImporter;
 
-        Excel::import($import, $request->file('file'));
+        $this->uploadQuestion($import, $request->file('file'));
 
         Log::info("After excell IMPORT");
         // Call handleErrorsAndFailures after import
@@ -162,6 +162,12 @@ class QuestionsController extends Controller
 
         return redirect()->back()
             ->with('success', "All {$successCount} files were processed successfully!");
+    }
+
+    private function uploadQuestion($importer, $file)
+    {
+        // In your controller
+        Excel::import($importer, $file);
     }
 
 }

@@ -2,6 +2,7 @@
 
 namespace App\Imports;
 
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -38,6 +39,8 @@ class SmartMultipleQuestionsImport
                 $this->successCount++;
 
             } catch (\Exception $e) {
+                Log::error($e);
+                
                 $this->errors[] = [
                     'file' => $file->getClientOriginalName(),
                     'message' => $e->getMessage(),

@@ -15,83 +15,48 @@ use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithStartRow;
 use Maatwebsite\Excel\Concerns\WithValidation;
 use App\Models\{Question, Subject};
+use App\Traits\ImportModelTraits;
 use App\Traits\TracksFileName;
+use Maatwebsite\Excel\Concerns\WithBatchInserts;
 use Maatwebsite\Excel\Validators\Failure;
 
-class QuestionsImport implements ToModel, WithStartRow, WithValidation, SkipsEmptyRows, SkipsOnFailure, SkipsOnError
+class QuestionsImport implements ToModel, WithStartRow, WithValidation, SkipsEmptyRows, SkipsOnFailure, SkipsOnError, WithBatchInserts
 {
-    use SkipsFailures, SkipsErrors, TracksFileName;
-
-    public function startRow(): int
-    {
-        return 2;
-    }
-
-    //    public function batchSize(): int
-    //    {
-    //        return 2;
-    //    }
+    use SkipsFailures, SkipsErrors, TracksFileName, ImportModelTraits;
 
     public function model(array $row)
     {
-
-        // Generate a unique, incremented question_id with suffix
-        $baseQuestionId = trim($row[0]);
-        $questionId = Str::slug($baseQuestionId . '---' . uuid_create());
-
-
-        // Create the question
-        $question = Question::create([
-            'question_id' => $questionId,
-            'test_type' => trim(strval($row[1])),
-            'section' => trim(strval($row[3])),
-            'subject_id' => Subject::where('name', trim(strval($row[2])))->firstOrFail()->id, // Ensure subject exists
-            'question' => trim(strval($row[4])),
+        return $this->createQuestion([
+            'question_text' => $row[4],
+            'exam_type' => $row[1],
+            'question_type' => $row[3],
+            'subject_name' => $row[2],
+            'question_image' => null, // V1 doesn't have image
+            'options' => [
+                'A' => $row[5],
+                'B' => $row[6],
+                'C' => $row[7],
+                'D' => $row[8],
+                'correct' => $row[9]
+            ]
         ]);
-
-        // Prepare options
-        $options = [
-            'A' => trim(strval($row[5])),
-            'B' => trim(strval($row[6])),
-            'C' => trim(strval($row[7])),
-            'D' => trim(strval($row[8])),
-        ];
-
-        // Identify the correct answer key
-        $correctAnswerKey = trim(strval($row[9]));
-
-        // Loop through options and add only non-correct answers
-        foreach ($options as $key => $text) {
-            $question->options()->create([
-                'option' => $text,
-                'option_key' => $key . '---' . uuid_create(),
-                'question_id' => $question->id,
-                'is_correct' => $key == $correctAnswerKey,
-            ]);
-        }
-
-        return $question; // Return the created question
     }
 
+    protected function createOptions(Question $question, $optionsData): void
+    {
+        foreach ($optionsData as $key => $text) {
+            if ($key === 'correct')
+                continue;
 
-    /**
-     * @param Failure[] $failures
-     */
-    //    public function onFailure(Failure ...$failures)
-//    {
-//        // Ensure $errors is initialized
-//        $this->errors = $this->errors ?? [];
-//
-//        foreach ($failures as $failure) {
-//            // Add each failure's row and error messages to the errors property
-//            $this->errors[] = [
-//                'row' => $failure->row(), // Row where the failure occurred
-//                'attribute' => $failure->attribute(), // Attribute that caused the error
-//                'errors' => $failure->errors(), // Array of error messages
-//            ];
-//        }
-//
-//    }
+            $question->options()->create([
+                'option' => $this->sanitizeOptionText($text),
+                'option_key' => $key . '---' . uuid_create(),
+                'question_id' => $question->id,
+                'is_correct' => $key === $optionsData['correct'],
+            ]);
+        }
+    }
+
 
     public function rules(): array
     {
@@ -142,7 +107,7 @@ class QuestionsImport implements ToModel, WithStartRow, WithValidation, SkipsEmp
 
             '2.required' => 'The Subject Name is required.',
             '2.string' => 'The Subject Name must be a string.',
-            '2.exists' => 'The Subject Name must exist in the list of subjects.',
+            '2.exists' => 'The Subject must exist in the list of subjects. Valid subjects are: ' . implode(', ', Subject::pluck('name')->toArray()),
 
             '3.max' => 'The Section must not exceed 255 characters.',
 
@@ -171,64 +136,5 @@ class QuestionsImport implements ToModel, WithStartRow, WithValidation, SkipsEmp
             '9.string' => 'The Correct Answer Key must be a string.',
             '9.in' => 'The Correct Answer Key must be one of the following: A, B, C, or D.',
         ];
-    }
-
-    public function handleErrorsAndFailures(): void
-    {
-        $errors = [];
-        $failures = [];
-
-        // Collect validation errors
-        if (method_exists(self::class, 'errors') && self::errors()) {
-            foreach (self::errors() as $error) {
-                $errors[] = $error; // Adjust based on the error structure
-            }
-        }
-
-        // Collect validation failures
-        if (method_exists(self::class, 'failures') && self::failures()) {
-            foreach (self::failures() as $failure) {
-                $failures[] = [
-                    'row' => $failure->row(),
-                    'attribute' => $failure->attribute(),
-                    'errors' => $failure->errors(),
-                    'values' => $failure->values(),
-                ];
-            }
-        }
-
-        // Throw an exception if there are any errors or failures
-        // Throw an exception if there are any errors or failures
-        if (!empty($errors) || !empty($failures)) {
-            $flattenedMessages = [];
-
-            // Flatten errors
-            foreach ($errors as $error) {
-                $flattenedMessages[] = 'Error: ' . $error->getMessage(); // Adjust as per error structure
-            }
-
-            // Flatten failures
-            foreach ($failures as $failure) {
-                $row = $failure['row'] ?? 'Unknown row';
-                $attribute = $failure['attribute'] ?? 'Unknown attribute';
-                $failureMessages = $failure['errors'] ?? [];
-
-                foreach ($failureMessages as $message) {
-                    $flattenedMessages[] = "Row $row, $attribute: $message";
-                }
-            }
-
-            $flattenedMessages = array_filter($flattenedMessages, fn($message) => !strpos($message, 'The Question Text has already been used.'));
-
-            session()->flash('message', 'Please note that some questions have been uploaded. The only ones that did not upload are shown in the error.');
-
-            // Use withMessages and pass the flattened messages
-            throw ValidationException::withMessages($flattenedMessages);
-        }
-    }
-
-    public function getErrors()
-    {
-        return $this->errors;
     }
 }

@@ -4,68 +4,44 @@ namespace App\Imports;
 
 use App\Constants\SetupConstant;
 use App\Models\{Question, Subject};
+use App\Traits\ImportModelTraits;
 use App\Traits\TracksFileName;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Str;
-use Illuminate\Validation\ValidationException;
 use Maatwebsite\Excel\Concerns\SkipsEmptyRows;
 use Maatwebsite\Excel\Concerns\SkipsErrors;
 use Maatwebsite\Excel\Concerns\SkipsFailures;
 use Maatwebsite\Excel\Concerns\SkipsOnError;
 use Maatwebsite\Excel\Concerns\SkipsOnFailure;
 use Maatwebsite\Excel\Concerns\ToModel;
+use Maatwebsite\Excel\Concerns\WithBatchInserts;
 use Maatwebsite\Excel\Concerns\WithStartRow;
 use Maatwebsite\Excel\Concerns\WithValidation;
-use Maatwebsite\Excel\Validators\Failure;
 
-class QuestionsImportV2 implements ToModel, WithStartRow, WithValidation, SkipsEmptyRows, SkipsOnFailure, SkipsOnError
+class QuestionsImportV2 implements ToModel, WithStartRow, WithValidation, SkipsEmptyRows, SkipsOnFailure, SkipsOnError, WithBatchInserts
 {
-    use SkipsFailures, SkipsErrors, TracksFileName;
-
-    public function startRow(): int
-    {
-        return 2;
-    }
+    use SkipsFailures, SkipsErrors, TracksFileName, ImportModelTraits;
 
     public function model(array $row)
     {
-        // Generate a unique question_id
-        $questionId = Str::slug($row[0] . '---' . uuid_create());
-
-        // Create the question
-        $question = Question::create([
-            'question_id' => $questionId,
-            'test_type' => strtoupper(trim(strval($row[3]))), // examType
-            'section' => '', // No section in new format
-            'subject_id' => Subject::where('name', trim(strval($row[4])))->firstOrFail()->id, // subject
-            'question' => trim(strval($row[0])), // question
-            'question_image' => !empty(trim(strval($row[1]))) ? trim(strval($row[1])) : null, // questionImage
+        return $this->createQuestion([
+            'question_text' => $row[0],
+            'exam_type' => $row[3],
+            'question_type' => $row[2],
+            'subject_name' => $row[4],
+            'question_image' => $row[1],
+            'options' => json_decode($row[5], true)
         ]);
+    }
 
-        // Process options (JSON format)
-        $options = json_decode($row[5], true);
-        Log::info($row[0]);
-
-        foreach ($options as $option) {
-            $sanitizedText = $this->sanitizeOptionText($option['optionText']);
+    protected function createOptions(Question $question, $optionsData): void
+    {
+        foreach ($optionsData as $option) {
             $question->options()->create([
-                'option' => $sanitizedText,
+                'option' => $this->sanitizeOptionText($option['optionText']),
                 'option_key' => $option['label'] . '---' . uuid_create(),
                 'question_id' => $question->id,
                 'is_correct' => $option['isCorrect'],
             ]);
         }
-
-        return $question;
-    }
-
-    /**
-     * Sanitize option text by removing the label prefix (e.g., "A. " or "B. ")
-     */
-    protected function sanitizeOptionText(string $optionText): string
-    {
-        // Remove pattern like "A. " or "B. " from the beginning
-        return preg_replace('/^[A-Z]\.\s*/', '', trim($optionText));
     }
 
     public function rules(): array
@@ -103,64 +79,10 @@ class QuestionsImportV2 implements ToModel, WithStartRow, WithValidation, SkipsE
             '3.in' => 'The Exam Type must be one of the following: ' . implode(', ', SetupConstant::$exams) . '.',
 
             '4.required' => 'The Subject is required.',
-            '4.exists' => 'The Subject must exist in the list of subjects.',
+            '4.exists' => 'The Subject must exist in the list of subjects. Valid subjects are: ' . implode(', ', Subject::pluck('name')->toArray()),
 
             '5.required' => 'The Options are required.',
             '5.json' => 'The Options must be in valid JSON format.',
         ];
-    }
-
-    public function handleErrorsAndFailures(): void
-    {
-        $errors = [];
-        $failures = [];
-
-        // Collect validation errors
-        if (method_exists($this, 'errors') && $this->errors()) {
-            foreach ($this->errors() as $error) {
-                $errors[] = $error;
-            }
-        }
-
-        // Collect validation failures
-        if (method_exists($this, 'failures') && $this->failures()) {
-            foreach ($this->failures() as $failure) {
-                $failures[] = [
-                    'row' => $failure->row(),
-                    'attribute' => $failure->attribute(),
-                    'errors' => $failure->errors(),
-                    'values' => $failure->values(),
-                ];
-            }
-        }
-
-        if (!empty($errors) || !empty($failures)) {
-            $flattenedMessages = [];
-
-            foreach ($errors as $error) {
-                $flattenedMessages[] = 'Error: ' . $error->getMessage();
-            }
-
-            foreach ($failures as $failure) {
-                $row = $failure['row'] ?? 'Unknown row';
-                $attribute = $failure['attribute'] ?? 'Unknown attribute';
-                $failureMessages = $failure['errors'] ?? [];
-
-                foreach ($failureMessages as $message) {
-                    $flattenedMessages[] = "Row $row, $attribute: $message";
-                }
-            }
-
-            $flattenedMessages = array_filter($flattenedMessages, fn($message) => !strpos($message, 'The Question Text has already been used.'));
-
-            session()->flash('message', 'Please note that some questions have been uploaded. The only ones that did not upload are shown in the error.');
-
-            throw ValidationException::withMessages($flattenedMessages);
-        }
-    }
-
-    public function getErrors()
-    {
-        return $this->errors;
     }
 }
