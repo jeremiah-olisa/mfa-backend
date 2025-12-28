@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Constants\SetupConstant;
 use App\Http\Requests\GetQuestionsRequest;
+use App\DTOs\QuestionResponseDto;
+use App\DTOs\QuestionFilterDto;
 use App\Imports\QuestionsImport;
 use App\Imports\QuestionsImportV2;
 use App\Imports\SmartMultipleQuestionsImport;
@@ -47,6 +49,16 @@ class QuestionsController extends Controller
         $data = ['questions' => $allQuestions];
 
         return new JsonResponse($data);
+    }
+
+    public function getQuestionsByType(GetQuestionsRequest $request, $type)
+    {
+        $filters = QuestionFilterDto::fromRequest($request, $type);
+        $perPage = $request->input('questions_limit', 15);
+
+        $result = $this->questionRepository->getFilteredQuestions($filters, $perPage);
+
+        return new JsonResponse(QuestionResponseDto::fromPaginatedResult($result)->toArray());
     }
 
     public function list(GetQuestionsRequest $request)

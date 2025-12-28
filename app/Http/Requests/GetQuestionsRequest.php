@@ -19,11 +19,15 @@ class GetQuestionsRequest extends FormRequest
     {
         return array_merge(
             $this->paginationRules([
-                'question_id' => 'nullable|string|max:255', // Ensure it is a string and not empty
-                'test_type' => 'nullable|string|max:255',  // Ensure it is a valid string
+                'question_id' => 'nullable|string|max:255',
+                'test_type' => 'nullable|string|max:255',
                 'subject' => 'nullable|string',
-                'search' => 'nullable|string|max:1000',  // Ensure it is a string and not empty
-                'question' => 'nullable|string|max:1000',  // Ensure it is a string and not empty
+                'subject_id' => 'nullable|integer|exists:subjects,id',
+                'subject_name' => 'nullable|string|max:255',
+                'subject_label' => 'nullable|string|max:255',
+                'questions_limit' => 'nullable|integer|min:1|max:200',
+                'search' => 'nullable|string|max:1000',
+                'question' => 'nullable|string|max:1000',
             ]),
         );
     }

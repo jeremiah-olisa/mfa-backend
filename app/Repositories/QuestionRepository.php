@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Models\Question;
+use App\DTOs\QuestionFilterDto;
 use function Laravel\Prompts\search;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\DB;
@@ -91,8 +92,21 @@ class QuestionRepository extends BaseRepository
     }
 
 
+    public function getFilteredQuestions(QuestionFilterDto $filters, int $perPage = 15)
+    {
+        $query = $this->model->newQuery();
 
+        $this->applyFiltersAndSorting($query, $filters->toArray());
 
+        $query->with(['subject:id,label', 'options']);
 
+        $filters->buildQuery($query);
 
+        $paginator = $query->cursorPaginate($perPage);
+
+        return [
+            'data' => $paginator->items(),
+            'pagination' => PaginationUtils::formatCursorPagination($paginator)
+        ];
+    }
 }

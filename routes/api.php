@@ -33,9 +33,12 @@ Route::middleware(['api', \App\Http\Middleware\ValidateMfaOrganizationHeader::cl
 //    Route::middleware('auth:sanctum')->group(function () {
 //    });
     Route::get('questions', [\App\Http\Controllers\QuestionsController::class, 'all']);
+    Route::get('questions/type/{type}', [\App\Http\Controllers\QuestionsController::class, 'getQuestionsByType']);
     Route::get('questions/{test_type}', [\App\Http\Controllers\QuestionsController::class, 'all_test_type']);
-    Route::get('subjects/{test_type?}', [\App\Http\Controllers\SubjectSyllabusController::class, 'getSubjectsWithMultipleQuestionsForExam']);
-    Route::get('syllabus/{test_type?}', [\App\Http\Controllers\SubjectSyllabusController::class, 'getSyllabusByExam']);
+    
+    Route::get('subjects/{test_type?}', [\App\Http\Controllers\SubjectController::class, 'getSubjectsWithMultipleQuestionsForExam']);
+
+    Route::get('syllabus/{test_type?}', [\App\Http\Controllers\SyllabusController::class, 'getSyllabusByExam']);
 });
 
 require __DIR__ . '/payment.php';
