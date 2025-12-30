@@ -102,6 +102,30 @@ class QuestionRepository extends BaseRepository
 
         $filters->buildQuery($query);
 
+        if ($filters->sort === 'randomize') {
+            // Logic for randomized unique questions
+            $query->inRandomOrder();
+            
+            // If randomizing, we typically want a specific number of items, not pages.
+            // But we must respect the return structure.
+            // Randomization breaks cursor pagination because "next page" logic relies on order.
+            // So we will return a single "page" of random results up to the limit.
+            
+            $results = $query->take($perPage)->get();
+
+            return [
+                'data' => $results,
+                'pagination' => [
+                    'path' => request()->url(),
+                    'per_page' => $perPage,
+                    'next_cursor' => null, // No next page for random fetch
+                    'next_page_url' => null,
+                    'prev_cursor' => null,
+                    'prev_page_url' => null,
+                ]
+            ];
+        }
+
         $paginator = $query->cursorPaginate($perPage);
 
         return [

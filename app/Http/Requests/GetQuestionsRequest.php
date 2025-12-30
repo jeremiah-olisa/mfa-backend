@@ -28,6 +28,7 @@ class GetQuestionsRequest extends FormRequest
                 'questions_limit' => 'nullable|integer|min:1|max:200',
                 'search' => 'nullable|string|max:1000',
                 'question' => 'nullable|string|max:1000',
+                'sort' => 'nullable|string|in:randomize,asc,desc',
             ]),
         );
     }
