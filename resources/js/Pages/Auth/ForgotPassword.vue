@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import InputError from '@/components/InputError.vue';
-import InputLabel from '@/components/InputLabel.vue';
-import PrimaryButton from '@/components/PrimaryButton.vue';
-import TextInput from '@/components/TextInput.vue';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import GuestLayout from '@/Layouts/GuestLayout.vue';
-import { Head, useForm } from '@inertiajs/vue3';
+import { Head, Link, useForm } from '@inertiajs/vue3';
 
 defineProps<{
     status?: string;
@@ -23,43 +23,49 @@ const submit = () => {
     <GuestLayout>
         <Head title="Forgot Password" />
 
-        <div class="mb-4 text-sm text-gray-600 dark:text-gray-400">
-            Forgot your password? No problem. Just let us know your email
-            address and we will email you a password reset link that will allow
-            you to choose a new one.
+        <div class="mb-8 text-center">
+            <h2 class="text-2xl font-bold tracking-tight text-foreground">Reset Password</h2>
+            <div class="mt-2 text-sm text-muted-foreground">
+                Enter your email address and we'll send you a link to reset your password.
+            </div>
         </div>
 
-        <div
-            v-if="status"
-            class="mb-4 text-sm font-medium text-green-600 dark:text-green-400"
-        >
+        <div v-if="status" class="mb-4 text-sm font-medium text-green-600">
             {{ status }}
         </div>
 
-        <form @submit.prevent="submit">
-            <div>
-                <InputLabel for="email" value="Email" />
-
-                <TextInput
+        <form @submit.prevent="submit" class="space-y-6">
+            <div class="space-y-2">
+                <Label for="email" class="text-foreground/80">Email</Label>
+                <Input
                     id="email"
                     type="email"
-                    class="mt-1 block w-full"
+                    class="block w-full border-border bg-secondary/50 text-foreground placeholder:text-muted-foreground/50 focus:bg-background transition-colors"
                     v-model="form.email"
                     required
                     autofocus
+                    placeholder="Enter your email"
                     autocomplete="username"
                 />
-
                 <InputError class="mt-2" :message="form.errors.email" />
             </div>
 
-            <div class="mt-4 flex items-center justify-end">
-                <PrimaryButton
-                    :class="{ 'opacity-25': form.processing }"
-                    :disabled="form.processing"
+            <Button
+                class="w-full bg-primary py-6 text-base font-semibold text-primary-foreground hover:bg-primary/90 transition-all shadow-lg shadow-primary/25"
+                :class="{ 'opacity-75': form.processing }"
+                :disabled="form.processing"
+            >
+                Email Password Reset Link
+            </Button>
+
+            <div class="text-center text-sm font-medium text-muted-foreground">
+                Remember your password?
+                <Link
+                    :href="route('login')"
+                    class="transition-colors hover:text-foreground"
                 >
-                    Email Password Reset Link
-                </PrimaryButton>
+                    Sign in
+                </Link>
             </div>
         </form>
     </GuestLayout>

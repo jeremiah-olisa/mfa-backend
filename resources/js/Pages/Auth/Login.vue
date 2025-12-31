@@ -31,7 +31,11 @@ const submit = () => {
 
 <template>
     <GuestLayout>
-        <Head title="Log in" />
+        <Head title="Sign in" />
+
+        <div class="mb-8 text-center">
+            <h2 class="text-2xl font-bold tracking-tight text-foreground">Sign in</h2>
+        </div>
 
         <div v-if="status" class="mb-4 text-sm font-medium text-green-600">
             {{ status }}
@@ -39,61 +43,74 @@ const submit = () => {
 
         <FormErrorAlert :errors="form.errors" />
 
-        <form @submit.prevent="submit">
-            <div>
-                <Label for="email">Email</Label>
+        <form @submit.prevent="submit" class="space-y-6">
+            <div class="space-y-2">
+                <Label for="email" class="text-foreground/80">Email</Label>
                 <Input
                     id="email"
                     type="email"
-                    class="mt-1 block w-full"
+                    class="block w-full border-border bg-secondary/50 text-foreground placeholder:text-muted-foreground/50 focus:bg-background transition-colors"
                     v-model="form.email"
                     required
                     autofocus
+                    placeholder="Enter email"
                     autocomplete="username"
                 />
-
                 <InputError class="mt-2" :message="form.errors.email" />
             </div>
 
-            <div class="mt-4">
-                <Label for="password">Password</Label>
+            <div class="space-y-2">
+                <div class="flex items-center justify-between">
+                    <Label for="password" class="text-foreground/80">Password</Label>
+                    <Link
+                        v-if="canResetPassword"
+                        :href="route('password.request')"
+                        class="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+                    >
+                        Forgot password?
+                    </Link>
+                </div>
                 <Input
                     id="password"
                     type="password"
-                    class="mt-1 block w-full"
+                    class="block w-full border-border bg-secondary/50 text-foreground placeholder:text-muted-foreground/50 focus:bg-background transition-colors"
                     v-model="form.password"
                     required
+                    placeholder="Enter password"
                     autocomplete="current-password"
                 />
-                <!-- Assuming you are still using the custom InputError component -->
                 <InputError class="mt-2" :message="form.errors.password" />
             </div>
 
-            <div class="mt-4 block">
-                <label class="flex items-center">
-                    <Checkbox name="remember" v-model:checked="form.remember" />
-                    <span class="ms-2 text-sm text-gray-600 dark:text-gray-400">
+            <div class="block">
+                <label class="flex items-center space-x-2">
+                    <Checkbox 
+                        name="remember" 
+                        v-model:checked="form.remember" 
+                        class="border-border bg-secondary data-[state=checked]:bg-primary" 
+                    />
+                    <span class="text-sm font-medium text-muted-foreground">
                         Remember me
                     </span>
                 </label>
             </div>
 
-            <div class="mt-4 flex items-center justify-end">
-                <Link
-                    v-if="canResetPassword"
-                    :href="route('password.request')"
-                    class="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-hidden focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:text-gray-400 dark:hover:text-gray-100 dark:focus:ring-offset-gray-800"
-                >
-                    Forgot your password?
-                </Link>
+            <Button
+                class="w-full bg-primary py-6 text-base font-semibold text-primary-foreground hover:bg-primary/90 transition-all shadow-lg shadow-primary/25"
+                :class="{ 'opacity-75': form.processing }"
+                :disabled="form.processing"
+            >
+                Sign in
+            </Button>
 
-                <Button
-                    class="ms-4"
-                    :class="{ 'opacity-25': form.processing }"
-                    :disabled="form.processing"
+            <div class="text-center text-sm font-medium text-muted-foreground">
+                Don't have an account?
+                <Link
+                    :href="route('register')"
+                    class="transition-colors hover:text-foreground"
                 >
-                    Log in
-                </Button>
+                    Sign up
+                </Link>
             </div>
         </form>
     </GuestLayout>
