@@ -38,6 +38,8 @@ Route::prefix('payment')->group(function () {
 Route::middleware('auth')->group(function () {
     Route::prefix('users')->group(function () {
         Route::get('/', [\App\Http\Controllers\UserController::class, 'list'])->name('users.list');
+        Route::post('/{user}/revoke', [\App\Http\Controllers\UserController::class, 'revokeAccess'])->name('users.revoke');
+        Route::post('/{user}/logout', [\App\Http\Controllers\UserController::class, 'logoutUser'])->name('users.logout');
     });
 
     Route::prefix('questions')->group(function () {

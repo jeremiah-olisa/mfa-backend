@@ -8,9 +8,18 @@ import {
     TableRow,
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { UserTable } from '@/types';
-import { Link } from '@inertiajs/vue3';
-import { Eye, Pencil } from 'lucide-vue-next';
+import { Link, router } from '@inertiajs/vue3';
+import { MoreHorizontal } from 'lucide-vue-next';
 
 const props = defineProps<{ users: UserTable[] }>();
 
@@ -36,27 +45,46 @@ const appBadgeClass = (app: string) => {
     };
     return apps[app] || 'bg-gray-100 text-gray-800 hover:bg-gray-100 dark:bg-gray-800 dark:text-gray-300';
 };
+
+const copyId = (id: number) => {
+    navigator.clipboard.writeText(id.toString());
+};
+
+const revokeAccess = (id: number) => {
+    if (confirm('Are you sure you want to revoke access for this user?')) {
+        router.post(route('users.revoke', id));
+    }
+};
+
+const logoutUser = (id: number) => {
+    if (confirm('Are you sure you want to log this user out of all devices?')) {
+        router.post(route('users.logout', id));
+    }
+};
 </script>
 
 <template>
     <Table>
         <TableHeader>
             <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Email</TableHead>
+                <TableHead>User</TableHead>
                 <TableHead>Phone Number</TableHead>
                 <TableHead>Role</TableHead>
                 <TableHead>App</TableHead>
                 <TableHead>Referral Code</TableHead>
                 <TableHead>Current Plan</TableHead>
                 <TableHead>Registered At</TableHead>
-                <TableHead class="text-center">Actions</TableHead>
+                <TableHead class="text-right">Actions</TableHead>
             </TableRow>
         </TableHeader>
         <TableBody>
             <TableRow v-for="(user, key) in users" :key="key">
-                <TableCell>{{ user?.name }}</TableCell>
-                <TableCell>{{ user?.email }}</TableCell>
+                <TableCell>
+                    <div class="flex flex-col">
+                        <span class="font-medium">{{ user?.name }}</span>
+                        <span class="text-xs text-muted-foreground">{{ user?.email }}</span>
+                    </div>
+                </TableCell>
                 <TableCell>{{ user?.profile?.phone ?? "N/A" }}</TableCell>
                 <TableCell>
                     <Badge variant="outline" class="font-medium capitalize"
@@ -77,14 +105,37 @@ const appBadgeClass = (app: string) => {
                 </TableCell>
                 <TableCell>{{ user?.referral_code || 'N/A' }}</TableCell>
                 <TableCell>
-                    {{ new Date(user?.plan_expires_at) < new Date() ? (user?.plan || 'N/A') : 'N/A' }} </TableCell>
-
-                        <TableCell>{{ formatDate(user?.created_at) }}</TableCell>
-                        <TableCell class="flex items-center justify-center gap-2">
-                            <Link href="" class="text-green-600 hover:text-green-800">
-                            <Pencil class="h-4 w-4" />
-                            </Link>
-                        </TableCell>
+                    {{ new Date(user?.plan_expires_at) < new Date() ? (user?.plan || 'N/A') : 'N/A' }} 
+                </TableCell>
+                <TableCell>{{ formatDate(user?.created_at) }}</TableCell>
+                <TableCell class="text-right">
+                    <DropdownMenu>
+                        <DropdownMenuTrigger as-child>
+                            <Button variant="ghost" class="h-8 w-8 p-0">
+                                <span class="sr-only">Open menu</span>
+                                <MoreHorizontal class="h-4 w-4" />
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                            <DropdownMenuItem @click="copyId(user.id)">
+                                Copy User ID
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem as-child>
+                                <!-- @vue-ignore -->
+                                <Link :href="route('users.edit', user.id)">Edit User</Link>
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem @click="revokeAccess(user.id)" class="text-red-600 focus:text-red-600">
+                                Revoke Access
+                            </DropdownMenuItem>
+                            <DropdownMenuItem @click="logoutUser(user.id)" class="text-orange-600 focus:text-orange-600">
+                                Logout User
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                </TableCell>
             </TableRow>
         </TableBody>
     </Table>

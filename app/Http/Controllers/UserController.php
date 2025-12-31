@@ -60,4 +60,19 @@ class UserController extends Controller
 
         return new JsonResponse($data);
     }
+
+    public function revokeAccess(\App\Models\User $user)
+    {
+        $user->update(['blocked_at' => now()]);
+
+        return redirect()->back()->with('success', 'User access revoked successfully.');
+    }
+
+    public function logoutUser(\App\Models\User $user)
+    {
+        \Illuminate\Support\Facades\DB::table('sessions')->where('user_id', $user->id)->delete();
+        $user->tokens()->delete();
+
+        return redirect()->back()->with('success', 'User logged out from all devices.');
+    }
 }

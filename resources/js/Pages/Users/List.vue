@@ -33,21 +33,20 @@ const pagination = ref({
         </template>
 
         <div class="space-y-4">
-             <Card class="bg-card border-border">
-                <CardHeader>
-                    <CardTitle>User Management</CardTitle>
-                </CardHeader>
+             <Card>
                 <CardContent>
                      <!-- Filters -->
-                    <UserTableFilter :roles="roles" :apps="apps" />
+                    <div class="py-4">
+                        <UserTableFilter :roles="roles" :apps="apps" />
+                    </div>
                     
-                    <div class="rounded-md border border-border mt-4">
+                    <div class="border-t border-border">
                          <div class="overflow-x-auto">
                             <UsersTable :users="users" />
                         </div>
                     </div>
 
-                    <div class="mt-4">
+                    <div class="p-4 border-t border-border">
                         <CursorPagination v-bind="pagination" />
                     </div>
                 </CardContent>
