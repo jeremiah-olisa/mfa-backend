@@ -1,0 +1,123 @@
+{
+    "name": "Nightwatch Design System",
+    "description": "A dark and light themed design system for the Nightwatch dashboard application.",
+    "themes": {
+        "dark": {
+            "colors": {
+                "primary": "#1e1e2e",
+                "secondary": "#28293d",
+                "accent": "#3b82f6",
+                "background": "#18181b",
+                "text": {
+                    "primary": "#e1e1e6",
+                    "secondary": "#a1a1aa"
+                },
+                "border": "#2d2d3a",
+                "error": "#ef4444",
+                "success": "#22c55e"
+            },
+            "shadows": {
+                "card": "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)"
+            }
+        },
+        "light": {
+            "colors": {
+                "primary": "#ffffff",
+                "secondary": "#f3f4f6",
+                "accent": "#3b82f6",
+                "background": "#f9fafb",
+                "text": {
+                    "primary": "#1f2937",
+                    "secondary": "#6b7280"
+                },
+                "border": "#e5e7eb",
+                "error": "#ef4444",
+                "success": "#22c55e"
+            },
+            "shadows": {
+                "card": "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)"
+            }
+        }
+    },
+    "typography": {
+        "fontFamily": "'Inter', sans-serif",
+        "scale": {
+            "h1": {
+                "fontSize": "32px",
+                "fontWeight": "700",
+                "lineHeight": "1.2"
+            },
+            "h2": {
+                "fontSize": "24px",
+                "fontWeight": "600",
+                "lineHeight": "1.3"
+            },
+            "h3": {
+                "fontSize": "20px",
+                "fontWeight": "600",
+                "lineHeight": "1.4"
+            },
+            "body": {
+                "fontSize": "16px",
+                "fontWeight": "400",
+                "lineHeight": "1.5"
+            },
+            "small": {
+                "fontSize": "14px",
+                "fontWeight": "400",
+                "lineHeight": "1.5"
+            }
+        }
+    },
+    "spacing": {
+        "base": 8,
+        "scale": {
+            "xs": "8px",
+            "sm": "16px",
+            "md": "24px",
+            "lg": "32px",
+            "xl": "48px"
+        }
+    },
+    "borderRadius": {
+        "sm": "8px",
+        "md": "12px",
+        "lg": "16px"
+    },
+    "components": {
+        "card": {
+            "backgroundColor": "var(--colors-primary)",
+            "borderRadius": "var(--borderRadius-md)",
+            "padding": "var(--spacing-md)",
+            "shadow": "var(--shadows-card)",
+            "border": "1px solid var(--colors-border)"
+        },
+        "button": {
+            "backgroundColor": "var(--colors-accent)",
+            "color": "#ffffff",
+            "padding": "10px 20px",
+            "borderRadius": "var(--borderRadius-sm)",
+            "fontWeight": "600",
+            "transition": "background-color 0.3s ease, transform 0.1s ease"
+        },
+        "input": {
+            "backgroundColor": "var(--colors-secondary)",
+            "color": "var(--colors-text-primary)",
+            "padding": "10px",
+            "borderRadius": "var(--borderRadius-sm)",
+            "border": "1px solid var(--colors-border)",
+            "transition": "border-color 0.3s ease"
+        },
+        "navigation": {
+            "sidebarBackgroundColor": "var(--colors-background)",
+            "itemColor": "var(--colors-text-secondary)",
+            "activeItemColor": "var(--colors-accent)",
+            "transition": "color 0.3s ease"
+        }
+    },
+    "animations": {
+        "hover": "transition: all 0.3s ease-in-out",
+        "fadeIn": "animation: fadeIn 0.5s ease-in-out",
+        "slideIn": "animation: slideIn 0.4s ease-in-out"
+    }
+}
