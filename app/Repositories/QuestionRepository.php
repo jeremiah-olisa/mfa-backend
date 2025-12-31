@@ -103,14 +103,6 @@ class QuestionRepository extends BaseRepository
 
         $filters->buildQuery($query);
 
-        // Debug logging for query
-        Log::info("Building query for filtered questions", [
-            'sql' => $query->toSql(),
-            'bindings' => $query->getBindings(),
-            'sort' => $filters->sort,
-            'limit' => $perPage
-        ]);
-
         if ($filters->sort === 'randomize') {
             // Logic for randomized unique questions
             $query->inRandomOrder();
@@ -121,7 +113,6 @@ class QuestionRepository extends BaseRepository
             // So we will return a single "page" of random results up to the limit.
 
             $results = $query->take($perPage)->get();
-            Log::info("Random questions query executed", ['count' => count($results)]);
 
             return [
                 'data' => $results,

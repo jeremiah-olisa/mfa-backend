@@ -14,8 +14,14 @@ class QuestionResponseDto implements Arrayable, JsonSerializable
 
     public static function fromPaginatedResult(array $result): self
     {
+        $data = $result['data'];
+
+        if (is_object($data) && method_exists($data, 'toArray')) {
+            $data = $data->toArray();
+        }
+
         return new self(
-            data: $result['data'],
+            data: (array) $data,
             pagination: $result['pagination']
         );
     }

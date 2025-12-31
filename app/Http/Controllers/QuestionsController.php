@@ -53,19 +53,10 @@ class QuestionsController extends Controller
 
     public function getQuestionsByType(GetQuestionsRequest $request, $type)
     {
-        Log::info("getQuestionsByType called", [
-            'type' => $type,
-            'params' => $request->all(),
-            'headers' => $request->headers->all()
-        ]);
-        
         $filters = QuestionFilterDto::fromRequest($request, $type);
-        Log::info("Filters created", ['filters' => (array)$filters]);
-        
         $perPage = $request->input('questions_limit', 15);
 
         $result = $this->questionRepository->getFilteredQuestions($filters, $perPage);
-        Log::info("Questions fetched", ['count' => count($result)]);
 
         return new JsonResponse(QuestionResponseDto::fromPaginatedResult($result)->toArray());
     }
@@ -144,7 +135,6 @@ class QuestionsController extends Controller
         $import->handleErrorsAndFailures();
 
         return redirect()->back()->with('success', 'Questions (V2 format) uploaded successfully.');
-
     }
 
     /**
@@ -190,5 +180,4 @@ class QuestionsController extends Controller
         // In your controller
         Excel::import($importer, $file);
     }
-
 }
