@@ -1,30 +1,24 @@
 <script setup lang="ts">
 import AppSidebar from '@/components/AppSidebar.vue';
+import { SidebarProvider, SidebarTrigger, SidebarInset } from '@/components/ui/sidebar';
 import { usePage } from '@inertiajs/vue3';
 
 const props: any = usePage().props;
 </script>
 
 <template>
-    <div class="flex min-h-screen bg-background text-foreground font-sans antialiased">
-        <!-- Sidebar -->
+    <SidebarProvider>
         <AppSidebar />
-
-        <!-- Main Content -->
-        <main class="flex-1 flex flex-col min-w-0 overflow-y-auto bg-background/50">
-             <!-- Header (Optional, for mobile trigger or breadcrumbs if needed, keeping simple for now) -->
-             <!-- <header class="h-14 border-b border-border flex items-center px-4 lg:hidden">
-                 Mobile Trigger here
-             </header> -->
-
-            <div class="flex-1 p-6 lg:p-8 space-y-6">
-                <!-- Page Heading -->
-                <header v-if="$slots.header" class="mb-4">
+        <SidebarInset>
+            <header class="flex h-16 shrink-0 items-center gap-2 border-b px-4">
+                <SidebarTrigger class="-ml-1" />
+                <div v-if="$slots.header" class="w-full">
                      <slot name="header" />
-                </header>
-
+                </div>
+            </header>
+            <div class="flex flex-1 flex-col gap-4 p-4 lg:p-8">
                 <slot />
             </div>
-        </main>
-    </div>
+        </SidebarInset>
+    </SidebarProvider>
 </template>

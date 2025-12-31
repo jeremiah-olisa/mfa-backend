@@ -126,6 +126,10 @@
     --ring: oklch(0.55 0.23 260);
 
     --radius: 0.5rem;
+    
+    --sidebar-width: 16rem;
+    --sidebar-width-mobile: 20rem;
+    --sidebar-width-icon: 3rem;
 
     /* Sidebar - Light */
     --sidebar: oklch(0.985 0 0);
