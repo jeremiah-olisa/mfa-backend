@@ -5,6 +5,15 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Question } from '@/types';
 import { router } from '@inertiajs/vue3';
 import { ListFilter, Search } from 'lucide-vue-next';
@@ -66,89 +75,71 @@ watch(
             <span
                 class="absolute inset-y-0 start-0 flex items-center justify-center px-2"
             >
-                <Search class="size-6 text-muted-foreground" />
+                <Search class="size-4 text-muted-foreground" />
             </span>
         </div>
 
         <!-- Dropdown Filter -->
         <DropdownMenu>
-            <DropdownMenuTrigger title="Filter" as="button">
-                <ListFilter />
+            <DropdownMenuTrigger as-child>
+                <Button variant="outline" size="icon">
+                    <ListFilter class="h-4 w-4" />
+                </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent :avoid-collisions="true">
-                <div class="rounded-md p-4">
-                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <DropdownMenuContent :avoid-collisions="true" class="w-80">
+                <div class="p-4 space-y-4">
+                    <div class="grid grid-cols-1 gap-4">
                         <div class="space-y-2">
-                            <label
-                                for="test-type"
-                                class="text-sm font-medium text-gray-700 dark:text-gray-300"
-                            >
-                                Exam Type
-                            </label>
-                            <select
-                                id="test-type"
-                                v-model="test_type"
-                                class="h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm shadow-xs focus:border-blue-500 focus:outline-hidden focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300"
-                            >
-                                <option value="">All Exam Types</option>
-                                <option v-for="(exam, key) in exams">
-                                    {{ exam }}
-                                </option>
-                            </select>
+                            <Label for="test-type">Exam Type</Label>
+                            <Select v-model="test_type">
+                                <SelectTrigger>
+                                    <SelectValue placeholder="All Exam Types" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">All Exam Types</SelectItem>
+                                    <SelectItem v-for="(exam, key) in exams" :key="key" :value="exam">
+                                         {{ exam }}
+                                    </SelectItem>
+                                </SelectContent>
+                            </Select>
                         </div>
 
                         <div class="space-y-2">
-                            <label
-                                for="subject"
-                                class="text-sm font-medium text-gray-700 dark:text-gray-300"
-                            >
-                                Subject
-                            </label>
-                            <select
-                                id="subject"
-                                v-model="subject"
-                                class="h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm shadow-xs focus:border-blue-500 focus:outline-hidden focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300"
-                            >
-                                <option value="">All Subjects</option>
-                                <option
-                                    v-for="(subject, key) in subjects"
-                                    :key="key"
-                                    :value="subject.label"
-                                >
-                                    {{ subject.label }}
-                                </option>
-                            </select>
+                            <Label for="subject">Subject</Label>
+                            <Select v-model="subject">
+                                <SelectTrigger>
+                                    <SelectValue placeholder="All Subjects" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">All Subjects</SelectItem>
+                                    <SelectItem
+                                        v-for="(subject, key) in subjects"
+                                        :key="key"
+                                        :value="subject.label"
+                                    >
+                                        {{ subject.label }}
+                                    </SelectItem>
+                                </SelectContent>
+                            </Select>
                         </div>
 
                         <div class="space-y-2">
-                            <label
-                                for="question-id"
-                                class="text-sm font-medium text-gray-700 dark:text-gray-300"
-                            >
-                                Question ID
-                            </label>
+                             <Label for="question-id">Question ID</Label>
                             <Input
                                 id="question-id"
                                 v-model="question_id"
                                 type="text"
                                 placeholder="Enter Question ID"
-                                class="h-10 w-full"
                             />
                         </div>
 
                         <div class="space-y-2">
-                            <label
-                                for="question"
-                                class="text-sm font-medium text-gray-700 dark:text-gray-300"
-                            >
-                                Question
-                            </label>
+                             <Label for="question">Question</Label>
                             <Input
                                 id="question"
                                 v-model="question"
                                 type="text"
                                 placeholder="Search questions"
-                                class="h-10 w-full"
                             />
                         </div>
                     </div>

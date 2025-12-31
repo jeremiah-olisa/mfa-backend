@@ -1,6 +1,14 @@
 ﻿<script setup lang="ts">
 import { Button } from '@/components/ui/button';
-import { Upload, X, RefreshCw, CheckCircle, AlertTriangle, FileText } from 'lucide-vue-next';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import { Upload, X, RefreshCw, CheckCircle, FileText } from 'lucide-vue-next';
 import FormErrorAlert from '@/components/FormErrorAlert.vue';
 import { useForm } from '@inertiajs/vue3';
 import { ref, computed } from 'vue';
@@ -10,6 +18,7 @@ const fileNames = ref<string[]>([]);
 const uploadProgress = ref<number>(0);
 const showSuccess = ref<boolean>(false);
 const isDragging = ref<boolean>(false);
+const isOpen = ref(false);
 
 const form = useForm({
     files: [] as File[],
@@ -56,7 +65,7 @@ const processFiles = (files: File[]) => {
     if (validFiles.length) {
         form.files = validFiles;
         fileNames.value = validFiles.map(file => file.name);
-        submitForm();
+        // Do not auto submit, let user review
     }
 };
 
@@ -82,10 +91,11 @@ const submitForm = () => {
             setTimeout(() => {
                 // Reload the page after showing success message
                 showSuccess.value = false;
+                isOpen.value = false; // Close dialog on success
 
                 // if (form.errors && Object.keys(form.errors).length > 0)
                 window.location.reload();
-            }, 5000);
+            }, 1000);
         },
         onError: () => {
             // Errors are automatically handled by form.errors
@@ -119,90 +129,102 @@ const handleDrop = (e: DragEvent) => {
 </script>
 
 <template>
-    <div class="flex flex-col gap-3">
-        <!-- Drag and drop zone -->
-        <div @dragenter="handleDragEnter" @dragleave="handleDragLeave" @dragover="handleDragOver" @drop="handleDrop"
-            :class="[
-                'border-2 border-dashed rounded-lg p-6 text-center transition-colors',
-                isDragging ? 'border-primary bg-primary/10' : 'border-muted-foreground/30',
-                hasFiles ? 'hidden' : 'block'
-            ]">
-            <div class="flex flex-col items-center justify-center gap-2">
-                <Upload class="h-10 w-10 text-muted-foreground" />
-                <p class="font-medium">Drag and drop your files here</p>
-                <p class="text-sm text-muted-foreground">or</p>
-                <Button variant="outline" @click="triggerFileInput">
-                    Browse Files
-                </Button>
-                <p class="text-xs text-muted-foreground mt-2">
-                    Supported formats: .xls, .xlsx, .csv (Max {{ MAX_FILES_UPLOAD }} files)
-                </p>
-            </div>
-        </div>
-
-        <!-- File list and controls (shown when files are selected) -->
-        <div v-if="hasFiles" class="space-y-4">
-            <!-- File list -->
-            <div class="space-y-2">
-                <div v-for="(file, index) in form.files" :key="index"
-                    class="flex items-center gap-3 p-2 border rounded">
-                    <FileText class="h-5 w-5 text-muted-foreground" />
-                    <span class="truncate flex-1">{{ file.name }}</span>
-                    <span class="text-sm text-muted-foreground">{{ (file.size / 1024).toFixed(1) }} KB</span>
+    <Dialog v-model:open="isOpen">
+        <DialogTrigger as-child>
+            <Button>
+                <Upload class="mr-2 h-4 w-4" />
+                Upload Questions
+            </Button>
+        </DialogTrigger>
+        <DialogContent class="sm:max-w-md">
+            <DialogHeader>
+                <DialogTitle>Upload Questions</DialogTitle>
+                <DialogDescription>
+                    Drag and drop Excel or CSV files to upload new questions.
+                </DialogDescription>
+            </DialogHeader>
+            <div class="flex flex-col gap-3 py-4">
+                <!-- Drag and drop zone -->
+                <div @dragenter="handleDragEnter" @dragleave="handleDragLeave" @dragover="handleDragOver" @drop="handleDrop"
+                    :class="[
+                        'border-2 border-dashed rounded-lg p-6 text-center transition-colors cursor-pointer',
+                        isDragging ? 'border-primary bg-primary/10' : 'border-muted-foreground/30 hover:bg-muted/50',
+                        hasFiles ? 'hidden' : 'block'
+                    ]"
+                    @click="triggerFileInput"
+                >
+                    <div class="flex flex-col items-center justify-center gap-2 pointer-events-none">
+                        <Upload class="h-10 w-10 text-muted-foreground" />
+                        <p class="font-medium">Drag and drop or click to browse</p>
+                         <p class="text-xs text-muted-foreground mt-2">
+                             .xls, .xlsx, .csv (Max {{ MAX_FILES_UPLOAD }} files)
+                        </p>
+                    </div>
                 </div>
+
+                <!-- File list and controls (shown when files are selected) -->
+                <div v-if="hasFiles" class="space-y-4">
+                    <!-- File list -->
+                    <div class="space-y-2 max-h-[200px] overflow-y-auto">
+                        <div v-for="(file, index) in form.files" :key="index"
+                            class="flex items-center gap-3 p-2 border rounded bg-background">
+                            <FileText class="h-5 w-5 text-muted-foreground" />
+                            <span class="truncate flex-1 text-sm">{{ file.name }}</span>
+                            <span class="text-xs text-muted-foreground">{{ (file.size / 1024).toFixed(1) }} KB</span>
+                        </div>
+                    </div>
+
+                    <!-- Controls -->
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <!-- Clear button -->
+                        <Button v-if="!form.processing" variant="outline" size="sm" @click="reset"
+                            class="text-destructive hover:text-destructive">
+                            <X class="h-4 w-4 mr-1" />
+                            Clear
+                        </Button>
+
+                         <!-- Retry button -->
+                        <Button v-if="form.errors && Object.keys(form.errors).length > 0 && !form.processing" variant="outline"
+                            size="sm" @click="retryUpload" class="text-amber-600 dark:text-amber-400">
+                            <RefreshCw class="h-4 w-4 mr-1" />
+                            Retry
+                        </Button>
+
+                        <!-- Upload button -->
+                        <Button @click="submitForm" :disabled="form.processing" class="ml-auto w-full sm:w-auto">
+                            <Upload class="mr-2 h-4 w-4" />
+                            {{ form.processing ? `Uploading (${uploadProgress}%)` : 'Upload Files' }}
+                        </Button>
+                    </div>
+
+                    <!-- Progress indicator -->
+                    <div v-if="form.processing" class="w-full bg-secondary rounded-full h-1.5">
+                        <div class="bg-primary h-1.5 rounded-full transition-all duration-300"
+                            :style="{ width: `${uploadProgress}%` }"></div>
+                    </div>
+
+                    <!-- Success message -->
+                    <div v-if="showSuccess" class="flex items-center text-sm text-green-600 dark:text-green-400">
+                        <CheckCircle class="h-4 w-4 mr-1" />
+                        Files uploaded successfully!
+                    </div>
+                </div>
+
+                <!-- Hidden file input -->
+                <input ref="fileInput" class="hidden" type="file" accept=".xls,.xlsx,.csv" :data-max-files="MAX_FILES_UPLOAD"
+                    @change="handleFileChange" multiple />
             </div>
 
-            <!-- Controls -->
-            <div class="flex items-center gap-2 flex-wrap">
-                <Button variant="outline" @click="triggerFileInput" :disabled="form.processing" class="h-auto">
-                    <Upload class="mr-2 h-4 w-4" />
-                    Add More Files
-                </Button>
-
-                <!-- Clear button -->
-                <Button v-if="!form.processing" variant="outline" size="sm" @click="reset"
-                    class="text-destructive dark:text-red-300 hover:text-destructive">
-                    <X class="h-4 w-4 mr-1" />
-                    Clear All
-                </Button>
-
-                <!-- Retry button -->
-                <Button v-if="form.errors && Object.keys(form.errors).length > 0 && !form.processing" variant="outline"
-                    size="sm" @click="retryUpload" class="text-amber-600 dark:text-amber-400">
-                    <RefreshCw class="h-4 w-4 mr-1" />
-                    Retry
-                </Button>
-
-                <!-- Upload button -->
-                <Button @click="submitForm" :disabled="form.processing" class="ml-auto">
-                    <Upload class="mr-2 h-4 w-4" />
-                    {{ form.processing ? `Uploading (${uploadProgress}%)` : 'Upload All' }}
-                </Button>
+            <!-- Error display inline -->
+            <div v-if="Object.keys(form.errors).length > 0" class="text-destructive text-sm max-h-[100px] overflow-y-auto p-2 bg-destructive/10 rounded">
+                <ul class="list-disc pl-4">
+                     <li v-for="(error, field) in form.errors" :key="field">
+                        {{ error }}
+                    </li>
+                </ul>
             </div>
-
-            <!-- Progress indicator -->
-            <div v-if="form.processing" class="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
-                <div class="bg-primary h-2.5 rounded-full transition-all duration-300"
-                    :style="{ width: `${uploadProgress}%` }"></div>
-            </div>
-
-            <!-- Success message -->
-            <div v-if="showSuccess" class="flex items-center text-sm text-green-600 dark:text-green-400">
-                <CheckCircle class="h-4 w-4 mr-1" />
-                Files uploaded successfully!
-            </div>
-        </div>
-
-        <!-- Hidden file input -->
-        <input ref="fileInput" class="hidden" type="file" accept=".xls,.xlsx,.csv" :data-max-files="MAX_FILES_UPLOAD"
-            @change="handleFileChange" multiple />
-    </div>
-
-    <!-- Error display -->
-    <Teleport defer to="#teleport-alert">
-        <FormErrorAlert v-if="Object.keys(form.errors).length > 0" :show-field-name="false" :errors="form.errors"
-            :error-title="`Upload Error (${Object.keys(form.errors).length} ${Object.keys(form.errors).length === 1 ? 'Error' : 'Errors'})`" />
-    </Teleport>
+        </DialogContent>
+    </Dialog>
 </template>
 
 <style scoped>

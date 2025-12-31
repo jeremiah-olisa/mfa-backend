@@ -7,6 +7,7 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
 import { UserTable } from '@/types';
 import { Link } from '@inertiajs/vue3';
 import { Eye, Pencil } from 'lucide-vue-next';
@@ -26,14 +27,14 @@ const formatDate = (date: string): string => {
 
 const appBadgeClass = (app: string) => {
     const apps: Record<string, string> = {
-        'WAEC': 'bg-purple-100 text-purple-800',
-        'NECO': 'bg-blue-100 text-blue-800',
-        'JAMB': 'bg-green-100 text-green-800',
-        'OYO': 'bg-yellow-100 text-yellow-800',
-        'WEB': 'bg-indigo-100 text-indigo-800',
-        'ADMIN': 'bg-red-100 text-red-800'
+        'WAEC': 'bg-purple-100 text-purple-800 hover:bg-purple-100 dark:bg-purple-900/30 dark:text-purple-300',
+        'NECO': 'bg-blue-100 text-blue-800 hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-300',
+        'JAMB': 'bg-green-100 text-green-800 hover:bg-green-100 dark:bg-green-900/30 dark:text-green-300',
+        'OYO': 'bg-yellow-100 text-yellow-800 hover:bg-yellow-100 dark:bg-yellow-900/30 dark:text-yellow-300',
+        'WEB': 'bg-indigo-100 text-indigo-800 hover:bg-indigo-100 dark:bg-indigo-900/30 dark:text-indigo-300',
+        'ADMIN': 'bg-red-100 text-red-800 hover:bg-red-100 dark:bg-red-900/30 dark:text-red-300'
     };
-    return apps[app] || 'bg-gray-100 text-gray-800';
+    return apps[app] || 'bg-gray-100 text-gray-800 hover:bg-gray-100 dark:bg-gray-800 dark:text-gray-300';
 };
 </script>
 
@@ -58,21 +59,21 @@ const appBadgeClass = (app: string) => {
                 <TableCell>{{ user?.email }}</TableCell>
                 <TableCell>{{ user?.profile?.phone ?? "N/A" }}</TableCell>
                 <TableCell>
-                    <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium capitalize"
+                    <Badge variant="outline" class="font-medium capitalize"
                         :class="{
-                            'bg-purple-100 text-purple-800': user?.role === 'admin',
-                            'bg-blue-100 text-blue-800': user?.role === 'user',
-                            'bg-green-100 text-green-800': user?.role === 'moderator',
-                            'bg-gray-100 text-gray-800': !['admin', 'user', 'moderator'].includes(user?.role)
+                            'bg-purple-100 text-purple-800 border-transparent hover:bg-purple-100 dark:bg-purple-900/30 dark:text-purple-300': user?.role === 'admin',
+                            'bg-blue-100 text-blue-800 border-transparent hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-300': user?.role === 'user',
+                            'bg-green-100 text-green-800 border-transparent hover:bg-green-100 dark:bg-green-900/30 dark:text-green-300': user?.role === 'moderator',
+                            'bg-gray-100 text-gray-800 border-transparent hover:bg-gray-100 dark:bg-gray-800 dark:text-gray-300': !['admin', 'user', 'moderator'].includes(user?.role)
                         }">
                         {{ user?.role }}
-                    </span>
+                    </Badge>
                 </TableCell>
                 <TableCell>
-                    <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium capitalize"
-                        :class="appBadgeClass(user?.user_app)">
+                    <Badge variant="outline" class="font-medium capitalize"
+                        :class="appBadgeClass(user?.user_app) + ' border-transparent'">
                         {{ user?.user_app || 'N/A' }}
-                    </span>
+                    </Badge>
                 </TableCell>
                 <TableCell>{{ user?.referral_code || 'N/A' }}</TableCell>
                 <TableCell>

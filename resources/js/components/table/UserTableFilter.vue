@@ -5,6 +5,15 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { router } from '@inertiajs/vue3';
 import { ListFilter, Search } from 'lucide-vue-next';
 import { ref, watch } from 'vue';
@@ -56,86 +65,68 @@ watch(
             <span
                 class="absolute inset-y-0 start-0 flex items-center justify-center px-2"
             >
-                <Search class="size-6 text-muted-foreground" />
+                <Search class="size-4 text-muted-foreground" />
             </span>
         </div>
 
         <!-- Dropdown Filter -->
         <DropdownMenu>
-            <DropdownMenuTrigger title="Filter" as="button">
-                <ListFilter />
+            <DropdownMenuTrigger as-child>
+                <Button variant="outline" size="icon">
+                    <ListFilter class="h-4 w-4" />
+                </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent :avoid-collisions="true">
-                <div class="rounded-md p-4">
-                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <DropdownMenuContent :avoid-collisions="true" class="w-80">
+                <div class="p-4 space-y-4">
+                    <div class="grid grid-cols-1 gap-4">
                         <div class="space-y-2">
-                            <label
-                                for="name"
-                                class="text-sm font-medium text-gray-700 dark:text-gray-300"
-                            >
-                                Name
-                            </label>
+                            <Label for="name">Name</Label>
                             <Input
                                 id="name"
                                 v-model="name"
                                 type="text"
                                 placeholder="Search by name"
-                                class="h-10 w-full"
                             />
                         </div>
 
                         <div class="space-y-2">
-                            <label
-                                for="email"
-                                class="text-sm font-medium text-gray-700 dark:text-gray-300"
-                            >
-                                Email
-                            </label>
+                             <Label for="email">Email</Label>
                             <Input
                                 id="email"
                                 v-model="email"
                                 type="text"
                                 placeholder="Search by email"
-                                class="h-10 w-full"
                             />
                         </div>
 
                         <div class="space-y-2">
-                            <label
-                                for="role"
-                                class="text-sm font-medium text-gray-700 dark:text-gray-300"
-                            >
-                                Role
-                            </label>
-                            <select
-                                id="role"
-                                v-model="role"
-                                class="h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm shadow-xs focus:border-blue-500 focus:outline-hidden focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300"
-                            >
-                                <option value="">All Roles</option>
-                                <option v-for="(role, key) in roles" :key="key">
-                                    {{ role }}
-                                </option>
-                            </select>
+                             <Label for="role">Role</Label>
+                             <Select v-model="role">
+                                <SelectTrigger>
+                                    <SelectValue placeholder="All Roles" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">All Roles</SelectItem>
+                                    <SelectItem v-for="(r, key) in roles" :key="key" :value="r">
+                                        {{ r }}
+                                    </SelectItem>
+                                </SelectContent>
+                            </Select>
                         </div>
 
                         <div class="space-y-2">
-                            <label
-                                for="app"
-                                class="text-sm font-medium text-gray-700 dark:text-gray-300"
-                            >
-                                App
-                            </label>
-                            <select
-                                id="app"
-                                v-model="app"
-                                class="h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm shadow-xs focus:border-blue-500 focus:outline-hidden focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300"
-                            >
-                                <option value="">All Apps</option>
-                                <option v-for="(app, key) in apps" :key="key">
-                                    {{ app }}
-                                </option>
-                            </select>
+                             <Label for="app">App</Label>
+                             <Select v-model="app">
+                                <SelectTrigger>
+                                    <SelectValue placeholder="All Apps" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">All Apps</SelectItem>
+                                    <SelectItem v-for="(a, key) in apps" :key="key" :value="a">
+                                        {{ a }}
+                                    </SelectItem>
+                                </SelectContent>
+                            </Select>
                         </div>
                     </div>
                 </div>

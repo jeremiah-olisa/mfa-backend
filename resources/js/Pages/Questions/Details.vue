@@ -2,6 +2,16 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { formatDate } from '@/lib/utils';
 import { Head, router } from '@inertiajs/vue3';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 
 import UploadQuestionButton from '@/components/UploadQuestionButton.vue';
 import { ref } from 'vue';
@@ -37,159 +47,67 @@ const deleteQuestion = async () => {
 
     <AuthenticatedLayout>
         <template #header>
-            <div
-                class="flex w-full flex-wrap items-center justify-between gap-y-3"
-            >
-                <h2
-                    class="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200"
-                >
-                    Questions
-                </h2>
-
-                <UploadQuestionButton />
+            <div class="flex items-center justify-between">
+                <h2 class="text-3xl font-bold tracking-tight text-foreground">Questions</h2>
+                <div class="flex items-center gap-2">
+                     <Button variant="destructive" @click="deleteQuestion">Delete Question</Button>
+                     <UploadQuestionButton />
+                </div>
             </div>
         </template>
 
-        <div class="py-12">
-            <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
-                <div
-                    class="min-h-screen bg-gray-100 px-4 py-12 dark:bg-gray-900 sm:px-6 lg:px-8"
-                >
-                    <div
-                        class="mx-auto max-w-3xl overflow-hidden rounded-lg bg-white shadow-md dark:bg-gray-800"
-                    >
-                        <div class="p-6">
-                            <div class="mb-6 flex items-center justify-between">
-                                <h1
-                                    class="text-3xl font-bold text-gray-900 dark:text-gray-100"
-                                >
-                                    Question Details
-                                </h1>
-                                <button
-                                    @click="deleteQuestion"
-                                    class="rounded-md bg-red-500 px-4 py-2 text-white hover:bg-red-600 focus:outline-hidden focus:ring-2 focus:ring-red-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800"
-                                >
-                                    Delete Question
-                                </button>
-                            </div>
+        <div class="space-y-4">
+            <Card>
+                <CardHeader>
+                    <CardTitle>Question Details</CardTitle>
+                    <CardDescription>View detailed information about this question.</CardDescription>
+                </CardHeader>
+                <CardContent class="grid gap-6 md:grid-cols-2">
+                     <div class="col-span-full space-y-1">
+                        <span class="text-sm font-medium leading-none text-muted-foreground">Question</span>
+                        <p class="text-lg font-semibold">{{ question.question }}</p>
+                    </div>
 
-                            <div class="grid gap-4 space-y-4 md:grid-cols-2">
-                                <!--                                <div>-->
-                                <!--                                    <label-->
-                                <!--                                        class="block text-sm font-medium text-gray-700 dark:text-gray-300"-->
-                                <!--                                        >Question ID</label-->
-                                <!--                                    >-->
-                                <!--                                    <p-->
-                                <!--                                        class="mt-1 text-lg text-gray-900 dark:text-gray-100"-->
-                                <!--                                    >-->
-                                <!--                                        {{ question.question_id }}-->
-                                <!--                                    </p>-->
-                                <!--                                </div>-->
+                    <div class="space-y-1">
+                         <span class="text-sm font-medium leading-none text-muted-foreground">Exam Type</span>
+                        <p class="text-base">{{ question.test_type }}</p>
+                    </div>
 
-                                <div class="col-span-full">
-                                    <label
-                                        class="block text-sm font-medium text-gray-700 dark:text-gray-300"
-                                        >Question</label
-                                    >
-                                    <p
-                                        class="mt-1 text-lg text-gray-900 dark:text-gray-100"
-                                    >
-                                        {{ question.question }}
-                                    </p>
-                                </div>
+                    <div class="space-y-1">
+                         <span class="text-sm font-medium leading-none text-muted-foreground">Subject</span>
+                        <p class="text-base">{{ question.subject.label }}</p>
+                    </div>
 
-                                <div>
-                                    <label
-                                        class="block text-sm font-medium text-gray-700 dark:text-gray-300"
-                                        >Exam Type</label
-                                    >
-                                    <p
-                                        class="mt-1 text-lg text-gray-900 dark:text-gray-100"
-                                    >
-                                        {{ question.test_type }}
-                                    </p>
-                                </div>
+                    <div v-if="question.section" class="space-y-1">
+                         <span class="text-sm font-medium leading-none text-muted-foreground">Section</span>
+                        <p class="text-base">{{ question.section }}</p>
+                    </div>
 
-                                <div>
-                                    <label
-                                        class="block text-sm font-medium text-gray-700 dark:text-gray-300"
-                                        >Subject</label
-                                    >
-                                    <p
-                                        class="mt-1 text-lg text-gray-900 dark:text-gray-100"
-                                    >
-                                        {{ question.subject.label }}
-                                    </p>
-                                </div>
+                    <div class="space-y-1">
+                         <span class="text-sm font-medium leading-none text-muted-foreground">Uploaded At</span>
+                        <p class="text-base">{{ formatDate(question.created_at) }}</p>
+                    </div>
 
-                                <div v-if="question.section">
-                                    <label
-                                        class="block text-sm font-medium text-gray-700 dark:text-gray-300"
-                                        >Section</label
-                                    >
-                                    <p
-                                        class="mt-1 text-lg text-gray-900 dark:text-gray-100"
-                                    >
-                                        {{ question.section }}
-                                    </p>
-                                </div>
+                    <div class="space-y-1">
+                         <span class="text-sm font-medium leading-none text-muted-foreground">Updated At</span>
+                        <p class="text-base">{{ formatDate(question.updated_at) }}</p>
+                    </div>
 
-                                <div>
-                                    <label
-                                        class="block text-sm font-medium text-gray-700 dark:text-gray-300"
-                                        >Uploaded At</label
-                                    >
-                                    <p
-                                        class="mt-1 text-lg text-gray-900 dark:text-gray-100"
-                                    >
-                                        {{ formatDate(question.created_at) }}
-                                    </p>
-                                </div>
-
-                                <div>
-                                    <label
-                                        class="block text-sm font-medium text-gray-700 dark:text-gray-300"
-                                        >Updated At</label
-                                    >
-                                    <p
-                                        class="mt-1 text-lg text-gray-900 dark:text-gray-100"
-                                    >
-                                        {{ formatDate(question.updated_at) }}
-                                    </p>
-                                </div>
-
-                                <div
-                                    v-if="question.options.length > 0"
-                                    class="col-span-full"
-                                >
-                                    <label
-                                        class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
-                                        >Options</label
-                                    >
-                                    <ul class="space-y-2">
-                                        <li
-                                            v-for="option in question.options"
-                                            :key="option.id"
-                                            class="flex items-center justify-between rounded-md bg-gray-50 p-3 dark:bg-gray-700"
-                                        >
-                                            <span
-                                                class="text-gray-900 dark:text-gray-100"
-                                                >{{ option.option }}</span
-                                            >
-                                            <span
-                                                v-if="option.is_correct"
-                                                class="rounded-full bg-green-500 px-2 py-1 text-sm text-white"
-                                            >
-                                                Correct
-                                            </span>
-                                        </li>
-                                    </ul>
-                                </div>
+                    <div v-if="question.options.length > 0" class="col-span-full space-y-3">
+                         <span class="text-sm font-medium leading-none text-muted-foreground">Options</span>
+                        <div class="space-y-2">
+                            <div
+                                v-for="option in question.options"
+                                :key="option.id"
+                                class="flex items-center justify-between rounded-md border p-3"
+                            >
+                                <span class="text-sm">{{ option.option }}</span>
+                                <Badge v-if="option.is_correct" variant="default" class="bg-green-600 hover:bg-green-700">Correct</Badge>
                             </div>
                         </div>
                     </div>
-                </div>
-            </div>
+                </CardContent>
+            </Card>
         </div>
     </AuthenticatedLayout>
 </template>

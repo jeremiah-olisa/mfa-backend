@@ -1,10 +1,16 @@
 <script setup lang="ts">
-import StatCard from '@/components/StatCard.vue';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head } from '@inertiajs/vue3';
-import { BookOpenCheck, Users } from 'lucide-vue-next';
+import { 
+    Users, 
+    BookOpenCheck, 
+    Clock
+} from 'lucide-vue-next';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
 
-const $props = defineProps<{
+const props = defineProps<{
     questions: number;
     WAEC: number;
     NECO: number;
@@ -14,29 +20,6 @@ const $props = defineProps<{
     admins: number;
     content_managers: number;
 }>();
-
-const cardStats = [
-    {
-        title: 'Total Users',
-        icon: Users,
-        mainValue: $props.users,
-        stats: [
-            { label: 'Students', value: $props.students },
-            { label: 'Admins', value: $props.admins },
-            { label: 'Content Managers', value: $props.content_managers },
-        ],
-    },
-    {
-        title: 'Total Questions',
-        icon: BookOpenCheck,
-        mainValue: $props.questions,
-        stats: [
-            { label: 'WAEC', value: $props.WAEC },
-            { label: 'NECO', value: $props.NECO },
-            { label: 'JAMB', value: $props.JAMB },
-        ],
-    },
-];
 </script>
 
 <template>
@@ -44,25 +27,62 @@ const cardStats = [
 
     <AuthenticatedLayout>
         <template #header>
-            <h2
-                class="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200"
-            >
-                Dashboard
-            </h2>
+            <div class="flex items-center justify-between">
+                <h2 class="text-3xl font-bold tracking-tight text-foreground">Dashboard</h2>
+                <div class="flex items-center space-x-2">
+                    <Button>
+                        <Clock class="mr-2 h-4 w-4" />
+                        Last 24 Hours
+                    </Button>
+                </div>
+            </div>
         </template>
 
-        <div class="py-12">
-            <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
-                <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                    <StatCard
-                        v-for="(card, index) in cardStats"
-                        :key="index"
-                        :title="card.title"
-                        :icon="card.icon"
-                        :mainValue="card.mainValue"
-                        :stats="card.stats"
-                    />
-                </div>
+        <div class="space-y-4">
+            <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+                <Card class="col-span-4 bg-card border-border">
+                    <CardHeader>
+                        <CardTitle class="text-base font-medium">Platform Stats</CardTitle>
+                        <CardDescription>
+                            Current system overview
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                            <div class="space-y-4">
+                                <div class="flex items-center">
+                                    <Users class="mr-4 h-4 w-4 text-muted-foreground" />
+                                    <div class="flex-1 space-y-1">
+                                        <p class="text-sm font-medium leading-none">Total Users</p>
+                                        <p class="text-xs text-muted-foreground">Admins, Students, Managers</p>
+                                    </div>
+                                    <div class="font-bold">{{ props.users }}</div>
+                                </div>
+                                <div class="flex items-center">
+                                    <BookOpenCheck class="mr-4 h-4 w-4 text-muted-foreground" />
+                                    <div class="flex-1 space-y-1">
+                                        <p class="text-sm font-medium leading-none">Questions</p>
+                                        <p class="text-xs text-muted-foreground">Across all subjects</p>
+                                    </div>
+                                    <div class="font-bold">{{ props.questions }}</div>
+                                </div>
+                            </div>
+                            <Separator class="my-4" />
+                            <div class="grid grid-cols-3 gap-2 text-center text-xs">
+                                <div class="bg-secondary/50 p-2 rounded">
+                                    <div class="font-bold text-foreground">{{ props.WAEC }}</div>
+                                    <div class="text-muted-foreground">WAEC</div>
+                                </div>
+                                <div class="bg-secondary/50 p-2 rounded">
+                                    <div class="font-bold text-foreground">{{ props.NECO }}</div>
+                                    <div class="text-muted-foreground">NECO</div>
+                                </div>
+                                <div class="bg-secondary/50 p-2 rounded">
+                                    <div class="font-bold text-foreground">{{ props.JAMB }}</div>
+                                    <div class="text-muted-foreground">JAMB</div>
+                                </div>
+                            </div>
+                    </CardContent>
+                </Card>
             </div>
         </div>
     </AuthenticatedLayout>

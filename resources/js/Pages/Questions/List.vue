@@ -7,6 +7,7 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { PaginationProps, Question } from '@/types';
 import { Head } from '@inertiajs/vue3';
 import { ref } from 'vue';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 const props = defineProps<{
     questions: Question[];
@@ -23,36 +24,36 @@ const pagination = ref({
 </script>
 
 <template>
-
     <Head title="Questions List" />
 
     <AuthenticatedLayout>
         <template #header>
-            <div class="flex w-full flex-wrap flex-col justify-between gap-y-3">
-                <h2 class="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">
-                    Questions
-                </h2>
-
+            <div class="flex items-center justify-between">
+                <h2 class="text-3xl font-bold tracking-tight text-foreground">Questions</h2>
                 <UploadQuestionButton />
             </div>
         </template>
 
-        <div class="py-12">
-            <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
-                <div class="p-6">
+        <div class="space-y-4">
+            <Card class="bg-card border-border">
+                <CardHeader>
+                    <CardTitle>Question Management</CardTitle>
+                </CardHeader>
+                <CardContent>
                     <!-- Filters -->
                     <QuestionTableFilter :subjects="subjects" :exams="exams" />
-
-                    <CursorPagination v-bind="pagination" />
-
-                    <!-- Table -->
-                    <div class="overflow-x-auto py-6">
-                        <QuestionsTable :questions="questions" />
+                    
+                    <div class="rounded-md border border-border mt-4">
+                        <div class="overflow-x-auto">
+                            <QuestionsTable :questions="questions" />
+                        </div>
                     </div>
 
-                    <CursorPagination v-bind="pagination" />
-                </div>
-            </div>
+                    <div class="mt-4">
+                        <CursorPagination v-bind="pagination" />
+                    </div>
+                </CardContent>
+            </Card>
         </div>
     </AuthenticatedLayout>
 </template>
