@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\DB;
 use App\Repositories\BaseRepository;
 use App\Utils\PaginationUtils;
+use Illuminate\Support\Facades\Log;
 
 /**
  * @template T of Question
@@ -102,16 +103,25 @@ class QuestionRepository extends BaseRepository
 
         $filters->buildQuery($query);
 
+        // Debug logging for query
+        Log::info("Building query for filtered questions", [
+            'sql' => $query->toSql(),
+            'bindings' => $query->getBindings(),
+            'sort' => $filters->sort,
+            'limit' => $perPage
+        ]);
+
         if ($filters->sort === 'randomize') {
             // Logic for randomized unique questions
             $query->inRandomOrder();
-            
+
             // If randomizing, we typically want a specific number of items, not pages.
             // But we must respect the return structure.
             // Randomization breaks cursor pagination because "next page" logic relies on order.
             // So we will return a single "page" of random results up to the limit.
-            
+
             $results = $query->take($perPage)->get();
+            Log::info("Random questions query executed", ['count' => count($results)]);
 
             return [
                 'data' => $results,
