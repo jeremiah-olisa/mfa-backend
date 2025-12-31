@@ -110,7 +110,7 @@ watch(
                             <select
                                 id="role"
                                 v-model="role"
-                                class="h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300"
+                                class="h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm shadow-xs focus:border-blue-500 focus:outline-hidden focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300"
                             >
                                 <option value="">All Roles</option>
                                 <option v-for="(role, key) in roles" :key="key">
@@ -129,7 +129,7 @@ watch(
                             <select
                                 id="app"
                                 v-model="app"
-                                class="h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300"
+                                class="h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm shadow-xs focus:border-blue-500 focus:outline-hidden focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300"
                             >
                                 <option value="">All Apps</option>
                                 <option v-for="(app, key) in apps" :key="key">

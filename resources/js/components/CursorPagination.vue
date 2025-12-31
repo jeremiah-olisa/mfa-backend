@@ -17,7 +17,7 @@
             <div class="flex items-center space-x-2">
                 <label for="per-page" class="text-sm font-medium">Rows per page</label>
                 <select id="per-page" v-model="selectedPerPage"
-                    class="h-8 rounded-md border border-input bg-background pl-2 pr-8 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                    class="h-8 rounded-md border border-input bg-background pl-2 pr-8 text-sm focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring">
                     <option v-for="option in perPageOptions" :key="option" :value="option">
                         {{ option }}
                     </option>
